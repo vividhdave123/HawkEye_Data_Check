@@ -1,0 +1,126 @@
+Service Name,Criteria 1,Criteria 2,Criteria 3,Time Window,CloudWatch Metrics Required,API Calls Required,Notes
+EC2,CPUUtilization > 10%,NetworkIn > 1MB/day OR NetworkOut > 1MB/day,StatusCheckFailed = 0,Last 7 days,CPUUtilization NetworkIn NetworkOut StatusCheckFailed,ec2:DescribeInstances,Adjust CPU threshold based on instance type
+RDS,DatabaseConnections > 0,ReadIOPS > 0 OR WriteIOPS > 0,DBInstanceStatus = available,Last 7 days,DatabaseConnections ReadIOPS WriteIOPS,rds:DescribeDBInstances,Check for read replicas separately
+DynamoDB,ConsumedReadCapacityUnits > 0,ConsumedWriteCapacityUnits > 0,TableStatus = ACTIVE,Last 7 days,ConsumedReadCapacityUnits ConsumedWriteCapacityUnits,dynamodb:DescribeTable,On-demand vs provisioned mode
+S3,NumberOfObjects > 0,GetRequests > 100/day OR PutRequests > 10/day,BucketSizeBytes increasing or stable,Last 14 days,NumberOfObjects BucketSizeBytes AllRequests,s3:GetBucketLocation s3:GetBucketTagging,Check S3 Access Analyzer
+Lambda,Invocations > 10/day,Errors < 10% of invocations,Duration within timeout limits,Last 7 days,Invocations Errors Duration Throttles,lambda:ListFunctions lambda:GetFunction,Check concurrent executions
+EBS,VolumeReadOps > 100/day,VolumeWriteOps > 100/day,State = in-use,Last 7 days,VolumeReadOps VolumeWriteOps VolumeReadBytes VolumeWriteBytes,ec2:DescribeVolumes,Attached volumes are typically active
+ElastiCache,CPUUtilization > 10%,CacheHits > 0,CacheHitRate > 50%,Last 7 days,CPUUtilization CacheHits CacheMisses NetworkBytesIn,elasticache:DescribeCacheClusters,Redis vs Memcached metrics differ
+ECS,RunningTasksCount > 0,CPUUtilization > 20% (on tasks),MemoryUtilization > 30%,Last 7 days,CPUUtilization MemoryUtilization,ecs:ListClusters ecs:ListTasks,Fargate vs EC2 launch types
+EKS,DesiredNodeCount > 0,RunningPodCount > 0,Node CPUUtilization > 20%,Last 7 days,CPUUtilization MemoryUtilization,eks:DescribeCluster eks:ListNodegroups,Use Kubernetes metrics
+Redshift,DatabaseConnections > 0,QueriesCompletedPerSecond > 0,CPUUtilization > 20%,Last 7 days,DatabaseConnections CPUUtilization QueriesCompletedPerSecond,redshift:DescribeClusters,Very expensive when idle
+CloudFront,Requests > 1000/day,BytesDownloaded > 1GB/day,4xxErrorRate < 5%,Last 7 days,Requests BytesDownloaded 4xxErrorRate 5xxErrorRate,cloudfront:ListDistributions,Check cache hit ratio
+API Gateway,Count > 100/day,4XXError < 10%,Latency < 10000ms average,Last 7 days,Count 4XXError 5XXError IntegrationLatency,apigateway:GetRestApis,REST vs HTTP API pricing
+VPC,Attached EC2/RDS/Lambda resources exist,NetworkIn > 0 OR NetworkOut > 0,At least one active subnet,Continuous,N/A (VPC-level metrics limited),ec2:DescribeVpcs ec2:DescribeSubnets,Check attached resources
+NAT Gateway,BytesOutToDestination > 1GB/day,ActiveConnectionCount > 10,PacketsOutToDestination > 1000/hour,Last 7 days,BytesOutToDestination ActiveConnectionCount PacketsOutToDestination,ec2:DescribeNatGateways,High hourly cost
+Elastic Load Balancer,ActiveConnectionCount > 10,RequestCount > 100/day (ALB) OR ProcessedBytes > 1GB/day (NLB),HealthyHostCount > 0,Last 7 days,ActiveConnectionCount RequestCount ProcessedBytes TargetResponseTime,elbv2:DescribeLoadBalancers,ALB vs NLB vs CLB
+Route 53,Queries > 1000/day (per hosted zone),HealthCheckStatus = 1 (for health checks),RecordSetCount > 0,Last 7 days,DNSQueries HealthCheckStatus,route53:ListHostedZones,Per hosted zone cost
+CloudWatch,MetricCount > 0,GetMetricStatistics API calls > 0,Active alarms exist,Last 14 days,N/A (service metrics),cloudwatch:DescribeAlarms logs:DescribeLogGroups,Custom metrics cost
+CloudTrail,EventCount > 100/day,Trail enabled,Management events captured,Last 7 days,N/A (trail status),cloudtrail:DescribeTrails cloudtrail:GetTrailStatus,Data events are expensive
+IAM,Users/Roles used within 90 days,API calls made with credentials,Active access keys,Last 90 days,N/A (IAM is free),iam:GetCredentialReport iam:GenerateCredentialReport,Use Access Analyzer
+KMS,NumberOfDecryptCalls > 0 OR NumberOfEncryptCalls > 0,Keys enabled,API request count > 100/month,Last 30 days,N/A,kms:ListKeys kms:DescribeKey,Customer vs AWS managed keys
+Secrets Manager,GetSecretValue API calls > 0,Secret accessed within 30 days,RotationEnabled = true (recommended),Last 30 days,N/A,secretsmanager:ListSecrets secretsmanager:DescribeSecret,Rotation recommended
+SNS,NumberOfMessagesPublished > 100/day,NumberOfNotificationsDelivered > 95% of published,Active subscriptions > 0,Last 7 days,NumberOfMessagesPublished NumberOfNotificationsDelivered NumberOfNotificationsFailed,sns:ListTopics,Check subscription protocols
+SQS,NumberOfMessagesSent > 10/day,NumberOfMessagesReceived > 10/day,ApproximateAgeOfOldestMessage < 1 hour,Last 7 days,NumberOfMessagesSent NumberOfMessagesReceived ApproximateNumberOfMessagesVisible,sqs:ListQueues sqs:GetQueueAttributes,FIFO vs Standard queues
+Kinesis,IncomingRecords > 1000/day,GetRecords.Success > 0,IteratorAgeMilliseconds < 60000,Last 7 days,IncomingRecords IncomingBytes GetRecords.Success IteratorAgeMilliseconds,kinesis:ListStreams kinesis:DescribeStream,Shard-level metrics
+Athena,DataScannedInBytes > 1GB/day,EngineExecutionTime > 0,TotalExecutionTime < query timeout,Last 7 days,N/A,athena:ListQueryExecutions,Pay per query scanned
+Glue,JobRuns > 0,DPUHours > 0,Job success rate > 80%,Last 7 days,N/A,glue:GetJobs glue:GetJobRuns,Development endpoints cost
+EMR,Cluster State = RUNNING or WAITING,Steps completed > 0,Core/Task node utilization > 30%,Last 7 days,IsIdle YARNMemoryAvailablePercentage,emr:ListClusters emr:DescribeCluster,Spot instances recommended
+SageMaker,Invocations > 100/day (endpoints),ModelLatency < 1000ms,TrainingJobStatus = Completed (for training),Last 7 days,Invocations ModelLatency CPUUtilization MemoryUtilization,sagemaker:ListEndpoints sagemaker:ListTrainingJobs,Endpoints are expensive
+Step Functions,ExecutionsStarted > 10/day,ExecutionsFailed < 10%,ExecutionsSucceeded > ExecutionsFailed,Last 7 days,ExecutionsStarted ExecutionsSucceeded ExecutionsFailed,states:ListStateMachines states:ListExecutions,Standard vs Express workflows
+EFS,ClientConnections > 0,DataReadIOBytes > 1GB/day OR DataWriteIOBytes > 100MB/day,PercentIOLimit < 95%,Last 7 days,ClientConnections DataReadIOBytes DataWriteIOBytes PercentIOLimit,elasticfilesystem:DescribeFileSystems,Provisioned vs Bursting
+FSx,DataReadBytes > 1GB/day,DataWriteBytes > 100MB/day,FileSystemState = AVAILABLE,Last 7 days,DataReadBytes DataWriteBytes,fsx:DescribeFileSystems,Windows vs Lustre vs ONTAP
+Backup,BackupJobsCompleted > 0,RecoveryPointsCreated > 0,BackupJobsSuccessful / BackupJobsCreated > 90%,Last 30 days,N/A,backup:ListBackupJobs backup:ListRecoveryPointsByBackupVault,Scheduled vs on-demand
+CloudFormation,StackStatus = CREATE_COMPLETE or UPDATE_COMPLETE,Stack resources provisioned,Recent stack updates (< 90 days),Last 90 days,N/A,cloudformation:ListStacks cloudformation:DescribeStacks,Drift detection available
+Config,ConfigurationRecorderStatus = Recording,ConfigRulesEvaluated > 0,ComplianceType tracked,Continuous,N/A,config:DescribeConfigurationRecorderStatus config:DescribeComplianceByConfigRule,Delivery channel required
+Systems Manager,RunCommandInvocations > 0,SessionsStarted > 0 (Session Manager),ManagedInstancesOnline > 0,Last 7 days,N/A,ssm:DescribeInstanceInformation ssm:ListCommands,Parameter Store separate
+WorkSpaces,WorkSpace in AVAILABLE state,ConnectionAttempts > 0,UserConnectedTime > 4 hours/day (for AlwaysOn),Last 7 days,Available InSessionLatency SessionDisconnect,workspaces:DescribeWorkspaces,AutoStop vs AlwaysOn billing
+AppStream,Fleet State = RUNNING,ActiveSessions > 0,CapacityUtilization > 30%,Last 7 days,ActualCapacity AvailableCapacity InUseCapacity,appstream:DescribeFleets,Always-On vs On-Demand
+Direct Connect,ConnectionState = available,Virtual interface state = available,BytesIn > 1GB/day OR BytesOut > 1GB/day,Last 7 days,ConnectionBpsEgress ConnectionBpsIngress ConnectionState,directconnect:DescribeConnections,Dedicated vs Hosted
+VPN,TunnelState = UP (at least one tunnel),TunnelDataIn > 100MB/day,TunnelDataOut > 100MB/day,Last 7 days,TunnelState TunnelDataIn TunnelDataOut,ec2:DescribeVpnConnections,Site-to-Site VPN
+Transit Gateway,BytesIn > 1GB/day,BytesOut > 1GB/day,Attachments in available state > 0,Last 7 days,BytesIn BytesOut PacketsIn PacketsOut,ec2:DescribeTransitGateways,Per-attachment costs
+DocumentDB,DatabaseConnections > 0,ReadIOPS > 0 OR WriteIOPS > 0,DBClusterStatus = available,Last 7 days,DatabaseConnections ReadIOPS WriteIOPS CPUUtilization,docdb:DescribeDBClusters,MongoDB compatibility
+Neptune,Queries > 100/day,GremlinRequestsPerSec > 0 OR SparqlRequestsPerSec > 0,CPUUtilization > 20%,Last 7 days,GremlinRequestsPerSec SparqlRequestsPerSec CPUUtilization,neptune:DescribeDBClusters,Graph database
+Timestream,SuccessfulRequestLatency indicates active queries,SystemErrors < 5%,MagneticStoreRejectedUploadBytes = 0,Last 7 days,SuccessfulRequestLatency SystemErrors,timestream:ListDatabases,Time series database
+QLDB,UserRequests > 0,JournalStorage increasing,Active sessions > 0,Last 7 days,N/A,qldb:ListLedgers qldb:DescribeLedger,Immutable ledger
+Keyspaces,ReadCapacityUnits > 0,WriteCapacityUnits > 0,SystemErrors < 5%,Last 7 days,UserErrors SystemErrors SuccessfulRequestLatency,cassandra:SELECT (CQL queries),Cassandra compatibility
+MemoryDB,Commands > 1000/day,CPUUtilization > 10%,EngineCPUUtilization > 10%,Last 7 days,CPUUtilization Commands NetworkBytesIn,memorydb:DescribeClusters,Redis compatible
+OpenSearch,SearchRate > 100/day,IndexingRate > 10/day,ClusterStatus.Green = true,Last 7 days,SearchRate IndexingRate CPUUtilization,opensearch:DescribeDomain,Elasticsearch fork
+MSK,BytesInPerSec > 1MB/sec,BytesOutPerSec > 1MB/sec,ActiveControllerCount = 1,Last 7 days,BytesInPerSec BytesOutPerSec CPUUser,kafka:ListClusters,Managed Kafka
+EventBridge,Invocations > 100/day,FailedInvocations < 5%,MatchedEvents > 0,Last 7 days,Invocations FailedInvocations MatchedEvents,events:ListRules,Custom vs AWS events
+AppFlow,FlowExecutionsStarted > 0,FlowExecutionsSucceeded > FlowExecutionsFailed,RecordsProcessed > 0,Last 7 days,FlowExecutionsStarted RecordsProcessed,appflow:ListFlows,SaaS integrations
+DataSync,TaskExecutions > 0,BytesTransferred > 1GB/execution,FilesTransferred > 0,Last 30 days,N/A,datasync:ListTasks datasync:ListTaskExecutions,Data transfer service
+Transfer Family,BytesIn > 1GB/day,BytesOut > 1GB/day,UserLoggedIn events > 0,Last 7 days,BytesIn BytesOut,transfer:ListServers transfer:ListUsers,SFTP/FTPS/FTP hourly cost
+Storage Gateway,CloudBytesUploaded > 1GB/day,CloudBytesDownloaded > 100MB/day,CacheHitPercent > 50%,Last 7 days,CloudBytesUploaded CacheHitPercent,storagegateway:ListGateways,File/Volume/Tape gateway
+Lightsail,Instance State = running,NetworkIn > 1MB/day,CPUUtilization > 10%,Last 7 days,CPUUtilization NetworkIn NetworkOut,lightsail:GetInstances,Fixed pricing tiers
+CodeBuild,Builds > 10/month,SuccessfulBuilds / Builds > 80%,Duration per build reasonable,Last 30 days,Builds SucceededBuilds FailedBuilds Duration,codebuild:ListProjects codebuild:ListBuilds,Pay per build minute
+CodePipeline,PipelineExecutions > 5/month,SucceededExecutions / TotalExecutions > 80%,ActionExecutions successful,Last 30 days,N/A,codepipeline:ListPipelines codepipeline:ListPipelineExecutions,Per-pipeline cost
+CodeDeploy,Deployments > 5/month,SuccessfulDeployments / Deployments > 90%,DeploymentGroupsActive > 0,Last 30 days,N/A,codedeploy:ListApplications codedeploy:ListDeployments,Free for EC2/Lambda/ECS
+CodeCommit,GitPushes > 5/month,GitPulls > 10/month,ActiveUsers > 0,Last 30 days,N/A,codecommit:ListRepositories,Pay for storage and requests
+CodeArtifact,PackageDownloads > 100/month,PackageUploads > 5/month,Requests > 0,Last 30 days,N/A,codeartifact:ListRepositories,Maven/npm/PyPI
+ECR,ImagePush > 5/month,ImagePull > 10/month,Images stored > 0,Last 30 days,N/A,ecr:DescribeRepositories ecr:ListImages,Pay for storage
+Amplify,BuildMinutes > 0,HostingBandwidth > 1GB/month,Builds successful,Last 30 days,N/A,amplify:ListApps,Build + hosting costs
+Cloud9,Environment running,UserActivity > 0 (CloudTrail),EC2 instance active,Last 7 days,CPUUtilization (underlying EC2),cloud9:ListEnvironments,Pay for EC2
+X-Ray,TracesIndexed > 100/day,SegmentsReceived > 1000/day,SamplingRate appropriate,Last 7 days,N/A,xray:GetTraceSummaries,Distributed tracing
+GuardDuty,Detector enabled,FindingsGenerated (any findings indicate threats),DataProcessed > 0,Continuous,N/A,guardduty:ListDetectors guardduty:ListFindings,Threat detection
+Macie,ClassificationJobs running,SensitiveDataFindings tracked,DataProcessed > 0,Last 30 days,N/A,macie2:ListClassificationJobs,S3 data classification
+Security Hub,Enabled in region,FindingsReceived > 0,SecurityScore tracked,Continuous,N/A,securityhub:DescribeHub securityhub:GetFindings,Security posture
+Inspector,Assessments active,FindingsGenerated > 0,ResourcesScanned > 0,Last 30 days,N/A,inspector2:ListFindings,Vulnerability scanning
+Detective,Enabled,VolumeUsageInBytes > 0,DataSources enabled (VPC Flow Logs CloudTrail),Continuous,N/A,detective:ListGraphs,Security investigation
+WAF,WebACL associated with resources,Requests evaluated > 1000/day,BlockedRequests tracked,Last 7 days,AllowedRequests BlockedRequests CountedRequests,wafv2:ListWebACLs,Per-rule and request
+Shield,Shield Advanced enabled (if subscribed),DDoSDetected events monitored,ResourcesProtected > 0,Continuous,DDoSDetected (CloudWatch),shield:DescribeSubscription,DDoS protection
+Firewall Manager,Policies active,AccountsInScope > 1,ComplianceStatus tracked,Continuous,N/A,fms:ListPolicies fms:GetComplianceDetail,Centralized firewall
+Network Firewall,Firewall associated with VPC,PacketsDropped OR PacketsPassedFirewall > 1000/day,FirewallStatus = READY,Last 7 days,Packets PassedFirewall DroppedPackets,network-firewall:DescribeFirewall,Stateful inspection
+Certificate Manager,Certificates in ISSUED status,Certificates associated with LB/CloudFront/API Gateway,DaysToExpiry > 30,Continuous,DaysToExpiry,acm:ListCertificates acm:DescribeCertificate,Free for ACM certs
+Organizations,Accounts > 1,SCPs or OUs configured,API calls for account management,Continuous,N/A (free service),organizations:ListAccounts,Multi-account management
+Control Tower,Landing zone deployed,Guardrails enabled,AccountsManaged > 1,Continuous,N/A,controltower:ListGuardrails,Account governance
+Service Catalog,Products provisioned > 0,ProvisionedProductsActive > 0,Portfolios shared,Last 30 days,N/A,servicecatalog:ListProvisionedProducts,Infrastructure catalog
+License Manager,Licenses tracked > 0,LicenseUsage monitored,LicenseConsumed > 0,Continuous,N/A,license-manager:ListLicenses,License tracking
+Trusted Advisor,Checks run (Business/Enterprise),Recommendations tracked,ChecksRefreshed < 7 days,Last 7 days,N/A,support:DescribeTrustedAdvisorChecks,Requires support plan
+Compute Optimizer,Recommendations generated,ResourcesAnalyzed > 0,EnhancedInfrastructureMetrics enabled,Last 14 days,N/A,compute-optimizer:GetRecommendationSummaries,Free service
+Cost Explorer,API calls > 0,Cost data analyzed,Budgets or anomaly detection active,Last 30 days,N/A,ce:GetCostAndUsage,Free service
+Budgets,Budgets configured > 0,Alerts triggered when threshold exceeded,ActualSpend tracked,Continuous,N/A,budgets:DescribeBudgets,First 2 budgets free
+Grafana,Workspace active,Dashboards accessed > 0,ActiveUsers > 0,Last 7 days,N/A,grafana:DescribeWorkspace grafana:ListWorkspaces,Per active user
+Prometheus,Workspace active,Metrics ingested > 0,ActiveMetricSeries > 100,Last 7 days,ActiveSeriesCount IngestedSamplesSum,amp:DescribeWorkspace,Managed Prometheus
+DevOps Guru,Insights generated > 0,MonitoredResourceGroups > 0,AnomaliesDetected tracked,Last 30 days,N/A,devops-guru:ListInsights,ML-powered operations
+Resilience Hub,Applications assessed,ResiliencyScore calculated,Recommendations available,Last 90 days,N/A,resiliencehub:ListApps,Resilience assessment
+Fault Injection Simulator,Experiments run > 0,ActionsExecuted successfully,TargetResources impacted,Last 90 days,N/A,fis:ListExperiments,Chaos engineering
+Incident Manager,Response plans configured,Incidents tracked,EngagementsActive during incidents,Continuous,N/A,ssm-incidents:ListIncidentRecords,Incident management
+FinSpace,Environments active,Datasets queried > 0,Users accessing data,Last 30 days,N/A,finspace:GetEnvironment,Financial services data
+HealthLake,Data stores active,FHIRResourcesCreated > 0,QueryExecutions > 0,Last 30 days,N/A,healthlake:ListFHIRDatastores,Healthcare FHIR data
+HealthOmics,Workflows run > 0,SequenceStores accessed,AnnotationStores queried,Last 30 days,N/A,omics:ListRuns,Genomics workflows
+HealthImaging,ImageSets stored > 0,GetImageSetMetadata calls > 0,ImageFrames retrieved > 0,Last 30 days,N/A,medical-imaging:ListImageSets,Medical imaging
+Clean Rooms,Collaborations active,Queries run > 0,DataProcessed > 0,Last 30 days,N/A,cleanrooms:ListCollaborations,Privacy-preserving analytics
+Entity Resolution,MatchingWorkflows run > 0,RecordsMatched > 0,JobStatus = SUCCEEDED,Last 30 days,N/A,entityresolution:ListMatchingWorkflows,Record matching
+Data Exchange,Data sets accessed > 0,Revisions imported > 0,ActiveSubscriptions > 0,Last 30 days,N/A,dataexchange:ListDataSets,Data marketplace
+Data Firehose,Records delivered > 1000/day,DeliveryToS3/Redshift/OpenSearch successful,DataFreshness < 5 minutes,Last 7 days,DeliveryToS3.Success IncomingRecords IncomingBytes,firehose:DescribeDeliveryStream,Streaming delivery
+Pinpoint,Messages sent > 100/day,CampaignsActive > 0,DeliveryRate > 95%,Last 7 days,N/A,pinpoint:GetCampaigns pinpoint:GetApplicationSettings,Customer engagement
+Simple Email Service,Emails sent > 100/day,DeliveryRate > 95%,BounceRate < 5%,Last 7 days,Send Delivery Bounce Complaint,ses:GetSendStatistics,Transactional email
+Chime,Meetings hosted > 0,AttendeeMinutes > 0,ActiveUsers > 0,Last 30 days,N/A,chime:ListMeetings,Business communications
+Connect,Contacts handled > 100/day,AgentOnlineTime > 0,ServiceLevel > 80%,Last 7 days,ContactsHandled AgentOnlineTime,connect:ListInstances,Contact center
+WorkDocs,Documents accessed > 0,ActiveUsers > 0,StorageUtilized increasing,Last 30 days,N/A,workdocs:DescribeUsers workdocs:DescribeActivities,Document collaboration
+WorkMail,Emails sent/received > 100/day,ActiveMailboxes > 0,MailboxUtilization tracked,Last 7 days,N/A,workmail:ListOrganizations workmail:ListUsers,Business email
+GameLift,Fleets active,GameSessions > 0,PlayerSessions > 0,Last 7 days,ActiveInstances CurrentPlayerSessions ActiveGameSessions,gamelift:DescribeFleetUtilization,Game server hosting
+Managed Blockchain,Network active,Proposals > 0,Transactions > 1000/day,Last 7 days,N/A,managedblockchain:ListNetworks,Hyperledger/Ethereum
+Ground Station,Contacts scheduled > 0,DataDelivered > 0,ContactStatus = completed,Last 90 days,N/A,groundstation:ListContacts,Satellite ground station
+IoT Core,Messages published > 1000/day,Rules triggered > 0,Connections > 10,Last 7 days,PublishIn.Success RulesExecuted Connect.Success,iot:ListThings,IoT messaging
+IoT Analytics,Messages ingested > 0,Datasets queried > 0,PipelineActivities executed,Last 7 days,N/A,iotanalytics:ListChannels iotanalytics:ListDatasets,IoT analytics
+IoT Greengrass,Deployments successful,Devices online > 0,ComponentsDeployed > 0,Last 7 days,N/A,greengrass:ListDeployments greengrass:ListCoreDevices,Edge IoT runtime
+IoT SiteWise,Assets with measurements > 0,DataPoints ingested > 1000/day,Portals accessed,Last 7 days,N/A,iotsitewise:ListAssets,Industrial data
+Lookout for Equipment,Inference executions > 0,AnomaliesDetected tracked,Models active,Last 30 days,N/A,lookoutequipment:ListInferenceExecutions,Equipment anomaly detection
+Kendra,Queries > 100/day,Indexes active,DocumentsIndexed > 100,Last 7 days,N/A,kendra:ListIndices kendra:Query,Intelligent search
+Lex,Conversations > 100/day,Intents matched > 0,SessionsActive > 0,Last 7 days,RuntimeUserInputEvents RuntimeIntentEvents,lex:GetBot,Conversational AI
+Polly,Characters synthesized > 10000/day,Successful requests > 95%,N/A,Last 7 days,N/A,polly:SynthesizeSpeech (API calls),Text-to-speech
+Transcribe,Audio minutes transcribed > 100/day,Jobs completed > 0,Accuracy > 80%,Last 7 days,N/A,transcribe:ListTranscriptionJobs,Speech-to-text
+Translate,Characters translated > 100000/day,SuccessfulRequests > 95%,LanguagePairs active,Last 7 days,N/A,translate:TranslateText (API calls),Language translation
+Comprehend,Text analyzed > 1MB/day,DetectOperations successful,EntitiesDetected > 0,Last 7 days,N/A,comprehend:DetectSentiment (API calls),NLP service
+Rekognition,Images analyzed > 1000/day,Faces detected OR labels detected,SuccessRate > 95%,Last 7 days,N/A,rekognition:DetectLabels (API calls),Image/video analysis
+Textract,Documents analyzed > 100/day,Pages processed > 0,ExtractionAccuracy > 90%,Last 7 days,N/A,textract:AnalyzeDocument (API calls),Document extraction
+Forecast,Forecasts generated > 0,Datasets imported > 0,ForecastExportJobs completed,Last 30 days,N/A,forecast:ListForecasts,Time series forecasting
+Personalize,Campaigns deployed,Recommendations generated > 1000/day,EventsIngested > 0,Last 7 days,N/A,personalize:ListCampaigns personalize:GetRecommendations,ML recommendations
+Fraud Detector,Predictions > 1000/day,Detectors deployed,ModelVersions active,Last 7 days,N/A,frauddetector:GetEventPrediction,Fraud detection
+Bedrock,Model invocations > 100/day,Tokens generated > 10000,Latency < 5000ms,Last 7 days,Invocations ModelLatency,bedrock:ListFoundationModels bedrock:InvokeModel,Foundation models
+SageMaker,Endpoints invoked > 100/day OR Training jobs running,ModelLatency < 1000ms,Invocations > 0,Last 7 days,ModelInvocations ModelLatency CPUUtilization,sagemaker:ListEndpoints sagemaker:ListTrainingJobs,Expensive endpoints
+Batch,Jobs submitted > 10/month,Jobs succeeded > Jobs failed,ComputeEnvironments active,Last 30 days,N/A,batch:ListJobs batch:DescribeComputeEnvironments,Batch processing
+Managed Apache Airflow,DAGs executed > 0,TasksSucceeded > TasksFailed,Workers active,Last 7 days,N/A,mwaa:GetEnvironment,Managed Airflow
+Managed Apache Flink,Application running,Records processed > 1000/sec,KPUs utilized > 1,Last 7 days,KPUs millisBehindLatest,kinesisanalyticsv2:DescribeApplication,Stream processing
