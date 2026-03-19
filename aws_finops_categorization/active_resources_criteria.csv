@@ -124,75 +124,75 @@ SageMaker,Endpoints invoked > 100/day OR Training jobs running,ModelLatency < 10
 Batch,Jobs submitted > 10/month,Jobs succeeded > Jobs failed,ComputeEnvironments active,Last 30 days,N/A,batch:ListJobs batch:DescribeComputeEnvironments,Batch processing
 Managed Apache Airflow,DAGs executed > 0,TasksSucceeded > TasksFailed,Workers active,Last 7 days,N/A,mwaa:GetEnvironment,Managed Airflow
 Managed Apache Flink,Application running,Records processed > 1000/sec,KPUs utilized > 1,Last 7 days,KPUs millisBehindLatest,kinesisanalyticsv2:DescribeApplication,Stream processing
-Deadline Cloud,, , , , , , 
-IoT Device Management,, , , , , , 
-IoT Device Defender,, , , , , , 
-IoT Events,, , , , , , 
-IoT FleetWise,, , , , , , 
-IoT TwinMaker,, , , , , , 
-Monitron,, , , , , , 
-Panorama,, , , , , , 
-Comprehend Medical,, , , , , , 
-Augmented AI,, , , , , , 
-Bedrock AgentCore,, , , , , , 
-Q Business,, , , , , , 
-Q Developer,, , , , , , 
-Nova Act,, , , , , , 
-Amazon Q,, , , , , , 
-DevOps Agent,, , , , , , 
-Service Quotas,, , , , , , 
-Resource Access Manager,, , , , , , 
-Resource Explorer,, , , , , , 
-Infrastructure Composer,, , , , , , 
-Serverless Application Repository,, , , , , , 
-Proton,, , , , , , 
-Data Transfer Terminal,, , , , , , 
-Supply Chain,, , , , , , 
-Partner Central,, , , , , , 
-Payment Cryptography,, , , , , , 
-Verified Permissions,, , , , , , 
-User Notifications,, , , , , , 
-End User Messaging,, , , , , , 
-Chime SDK,, , , , , , 
-WorkSpaces Applications,, , , , , , 
-WorkSpaces Secure Browser,, , , , , , 
-WorkSpaces Thin Client,, , , , , , 
-Red Hat OpenShift Service on AWS,, , , , , , 
-Elastic VMware Service,, , , , , , 
-Oracle Database@AWS,, , , , , , 
-Outposts,, , , , , , 
-One Enterprise,, , , , , , 
-Wickr,, , , , , , 
-SimSpace Weaver,, , , , , , 
-Parallel Computing Service,, , , , , , 
-Telco Network Builder,, , , , , , 
-Braket,, , , , , , 
-Signer,, , , , , , 
-Artifact,, , , , , , 
-Audit Manager,, , , , , , 
-Billing Conductor,, , , , , , 
-B2B Data Interchange,, , , , , , 
-Auto Scaling,, , , , , , 
-SWF,, , , , , , 
-CloudShell,, , , , , , 
-CloudSearch,, , , , , , 
-CloudHSM,, , , , , , 
-Cloud Map,, , , , , , 
-Directory Service,, , , , , , 
-Elastic Transcoder,, , , , , , 
-Elastic Disaster Recovery,, , , , , , 
-Identity Center,, , , , , , 
-Global Accelerator,, , , , , , 
-Global View,, , , , , , 
-Recycle Bin,, , , , , , 
-RTB Fabric,, , , , , , 
-CodeCatalyst,, , , , , , 
-Console Home,, , , , , , 
-Security Agent,, , , , , , 
-Security Hub CSPM,, , , , , , 
-Security Incident Response,, , , , , , 
-Security Lake,, , , , , , 
-Private Certificate Authority,, , , , , , 
-S3 Glacier,, , , , , , 
-MQ,, , , , , , 
-Aurora DSQL,, , , , , , 
+Deadline Cloud,Jobs submitted > 10/month,Queues active with workers > 0,Job success rate > 80%,Last 30 days,N/A,deadline:ListQueues deadline:ListJobs,Render farm management; pay per compute hour
+IoT Device Management,Fleets managed > 0,Jobs executed > 10/month,DevicesReporting > 0,Last 30 days,N/A,iot:ListThingGroups iot:ListJobs,Device fleet management
+IoT Device Defender,AuditFindings > 0 OR ViolationsActive > 0,SecurityProfilesActive > 0,Devices audited > 0,Last 30 days,Violations,iot:ListAuditFindings iot:ListSecurityProfiles,IoT security monitoring
+IoT Events,DetectorModels active > 0,InputsReceived > 100/day,DetectorModelEvaluations > 0,Last 7 days,N/A,iotevents:ListDetectorModels iotevents:ListInputs,IoT event detection
+IoT FleetWise,Vehicles registered > 0,SignalCatalogItems > 0,CampaignsActive > 0,Last 30 days,N/A,iotfleetwise:ListVehicles iotfleetwise:ListCampaigns,Vehicle data collection
+IoT TwinMaker,Workspaces active > 0,SceneComponents > 0,Entities queried > 0,Last 30 days,N/A,iottwinmaker:ListWorkspaces iottwinmaker:ListEntities,Digital twin service
+Monitron,Projects active > 0,SensorReadings ingested > 0,AnomaliesDetected tracked,Last 30 days,N/A,monitron:ListProjects,Industrial equipment monitoring
+Panorama,Appliances online > 0,Models deployed > 0,VideoStreamsProcessed > 0,Last 7 days,N/A,panorama:ListApplicationInstances panorama:ListDevices,Edge computer vision
+Comprehend Medical,DetectEntitiesV2 calls > 100/day,InferenceUnits > 0 OR API calls > 0,SuccessRate > 95%,Last 7 days,N/A,comprehendmedical:DetectEntitiesV2 (API calls),Medical NLP; pay per character
+Augmented AI,HumanLoops active > 0,TasksCompleted > 0,WorkforceActive > 0,Last 30 days,N/A,sagemaker-a2i-runtime:ListHumanLoops,Human review workflows
+Bedrock AgentCore,AgentInvocations > 100/day,Tools executed > 0,AgentSessionsActive > 0,Last 7 days,Invocations AgentLatency,bedrock-agent-runtime:InvokeAgent bedrock-agent:ListAgents,Agentic AI workflows
+Q Business,Conversations > 100/day,DocumentsIndexed > 0,ActiveUsers > 0,Last 7 days,N/A,qbusiness:ListApplications qbusiness:GetApplication,Enterprise AI assistant
+Q Developer,CodeSuggestions accepted > 10/day,ActiveUsers > 0,SecurityScanFindings tracked,Last 7 days,N/A,codewhisperer:GenerateRecommendations (API calls),AI code assistant; pay per user
+Nova Act,AgentRuns > 10/day,TasksCompleted > 0,SuccessRate > 80%,Last 7 days,N/A,nova:ListAgentRuns (API calls),Agentic web browsing tasks
+Amazon Q,Queries > 100/day,ActiveUsers > 0,SubscriptionActive = true,Last 7 days,N/A,q:ListSubscriptions (API calls),AWS AI assistant across services
+DevOps Agent,AgentInvocations > 10/month,TasksCompleted > 0,SuccessRate > 80%,Last 30 days,N/A,codepipeline:ListPipelines (via agent),Automated DevOps agent
+Service Quotas,QuotaRequestsSubmitted > 0,QuotasMonitored > 0,AlarmsConfigured > 0,Last 90 days,N/A,servicequotas:ListRequestedServiceQuotaChanges servicequotas:ListServiceQuotas,Free service; quota management
+Resource Access Manager,ResourceSharesActive > 0,PrinciplesAssociated > 0,ResourcesShared > 0,Continuous,N/A,ram:ListResourceShares ram:ListResources,Cross-account resource sharing
+Resource Explorer,SearchesExecuted > 0,IndexesActive > 0,ResourcesIndexed > 0,Last 30 days,N/A,resource-explorer-2:Search resource-explorer-2:ListIndexes,Free service; cross-region search
+Infrastructure Composer,TemplatesCreated > 0,DeploymentsInitiated > 0,ApplicationsModeled > 0,Last 90 days,N/A,cloudformation:ListStacks,Visual IaC designer
+Serverless Application Repository,ApplicationsDeployed > 0,DeploymentsExecuted > 0,ApplicationsPublished > 0,Last 90 days,N/A,serverlessrepo:ListApplications,Pay for deployed resources
+Proton,EnvironmentsDeployed > 0,ServiceInstancesActive > 0,DeploymentsPending = 0,Last 30 days,N/A,proton:ListEnvironments proton:ListServiceInstances,Infrastructure templates
+Data Transfer Terminal,TransfersInitiated > 0,DataTransferred > 1GB/month,JobsCompleted successfully,Last 30 days,N/A,dtt:ListJobs (API calls),Physical data transfer terminal
+Supply Chain,Forecasts generated > 0,InsightsActive > 0,DataSynced recently < 7 days,Last 30 days,N/A,scn:ListInstances (API calls),Supply chain visibility
+Partner Central,Opportunities active > 0,CollaborationsOngoing > 0,PartnersEngaged > 0,Last 30 days,N/A,partnercentral-selling:ListOpportunities (API calls),Partner relationship management
+Payment Cryptography,KeysActive > 0,TranslateKeysRequests > 100/month,CryptographicOperations > 0,Last 30 days,N/A,payment-cryptography:ListKeys,Payment HSM; pay per key/operation
+Verified Permissions,AuthorizationRequests > 100/day,PoliciesActive > 0,PolicyStoresActive > 0,Last 7 days,N/A,verifiedpermissions:ListPolicyStores verifiedpermissions:IsAuthorized,Cedar policy authorization
+User Notifications,NotificationsSent > 100/day,ChannelsActive > 0,NotificationHubEnabled = true,Last 7 days,N/A,notifications:ListNotificationHubs notifications:ListEventRules,Free service; centralized alerts
+End User Messaging,MessagesSent > 100/day,PhoneNumbersActive > 0,DeliveryRate > 95%,Last 7 days,N/A,sms-voice:DescribePhoneNumbers (API calls),SMS/voice messaging; pay per message
+Chime SDK,MediaSessionsActive > 0,Attendees > 0,MessagingAPIRequests > 100/day,Last 7 days,N/A,chime:ListMeetings chime-sdk-messaging:ListChannels,Real-time communications SDK
+WorkSpaces Applications,ApplicationsDeployed > 0,AppInstances active > 0,UsersAccessing > 0,Last 30 days,N/A,workspaces-web:ListPortals appstream:DescribeApplications,Managed app streaming
+WorkSpaces Secure Browser,PortalsActive > 0,BrowserSessions > 0,ActiveUsers > 0,Last 7 days,N/A,workspaces-web:ListPortals workspaces-web:ListUserSettings,Secure web browsing; pay per user-hour
+WorkSpaces Thin Client,DevicesActive > 0,DevicesRegistered > 0,SoftwareSetActive > 0,Last 7 days,N/A,thinclient:ListDevices thinclient:ListEnvironments,Thin client management; pay per device
+Red Hat OpenShift Service on AWS,ClustersRunning > 0,NodeCPUUtilization > 20%,APIServerRequests > 100/day,Last 7 days,CPUUtilization MemoryUtilization,rosa:ListClusters,Managed OpenShift; expensive hourly
+Elastic VMware Service,VMsRunning > 0,VMCPUUtilization > 20%,ClusterState = DEPLOYED,Last 7 days,CPUUtilization MemoryUtilization,evs:DescribeVclusters (API calls),VMware workloads on AWS
+Oracle Database@AWS,DatabasesActive > 0,ConnectionsActive > 0,DatabaseStatus = AVAILABLE,Last 7 days,DatabaseConnections CPUUtilization,odb:ListDbServers (API calls),Oracle Database native on AWS
+Outposts,OutpostsCapacityActive > 0,InstancesRunning > 0 (on Outpost),ConnectivityStatus = connected,Last 7 days,CPUUtilization MemoryUtilization (on EC2 instances),outposts:ListOutposts ec2:DescribeInstances,Expensive on-premises AWS hardware
+One Enterprise,LicensesActive > 0,UsersActive > 0,ServicesEnabled > 0,Last 30 days,N/A,license-manager:ListReceivedLicenses,Enterprise license bundle
+Wickr,ActiveUsers > 0,MessagesSent > 0,NetworksOnline > 0,Last 30 days,N/A,wickr:GetNetwork (API calls),Secure enterprise messaging; pay per user
+SimSpace Weaver,SimulationsRunning > 0,AppDomainsCurrent > 0,ClockTicksProcessed > 0,Last 30 days,N/A,simspaceweaver:ListSimulations,Large-scale simulations; pay per compute
+Parallel Computing Service,ClustersActive > 0,JobsSubmitted > 0,ComputeNodesRunning > 0,Last 30 days,CPUUtilization MemoryUtilization,pcs:ListClusters pcs:ListJobs,HPC cluster management
+Telco Network Builder,NetworkInstances active > 0,FunctionPackagesDeployed > 0,NetworkServicesActive > 0,Last 30 days,N/A,tnb:ListSolNetworkInstances tnb:ListSolFunctionPackages,Telecom network automation
+Braket,TasksExecuted > 0,ShotsUsed > 100/month,DeviceAvailability checked,Last 30 days,N/A,braket:GetQuantumTask braket:SearchQuantumTasks,Quantum computing; pay per task/shot
+Signer,SigningJobsCompleted > 0,SigningProfilesActive > 0,SigningJobsSucceeded > 90%,Last 30 days,N/A,signer:ListSigningJobs signer:ListSigningProfiles,Code signing service
+Artifact,AgreementsAccepted > 0,ReportsAccessed > 0,NDAActive = true,Last 90 days,N/A,artifact:GetReport artifact:ListAgreements,Free service; compliance reports
+Audit Manager,FrameworksActive > 0,AssessmentsActive > 0,EvidenceCollected > 0,Last 30 days,N/A,auditmanager:ListAssessments auditmanager:GetAccountStatus,Compliance audit automation
+Billing Conductor,BillingGroupsActive > 0,PricingRulesApplied > 0,CustomLineitems > 0,Last 30 days,N/A,billingconductor:ListBillingGroups billingconductor:ListPricingRules,Pro forma billing; pay per linked account
+B2B Data Interchange,PartnershipsActive > 0,TransactionsProcessed > 100/month,TradingPartnersConnected > 0,Last 30 days,N/A,b2bi:ListPartnerships b2bi:ListTransformers,EDI transformation; pay per GB
+Auto Scaling,AutoScalingGroupsActive > 0,ScalingActivities > 0,InstancesInService > 0,Last 7 days,GroupInServiceInstances GroupTotalInstances,autoscaling:DescribeAutoScalingGroups autoscaling:DescribeScalingActivities,Free service; pay for underlying resources
+SWF,WorkflowExecutionsOpen > 0,ActivityTasksCompleted > 100/month,DecisionTasksPending < 100,Last 30 days,N/A,swf:ListOpenWorkflowExecutions swf:ListDomains,Legacy workflow; consider Step Functions
+CloudShell,SessionsLaunched > 0,ActiveSessions > 0,StorageUsed < 1GB (limit),Last 30 days,N/A,cloudshell:GetEnvironmentStatus (API calls),Free service; 1GB persistent storage
+CloudSearch,SearchRequests > 100/day,IndexDocuments > 0,SearchDomainState = Active,Last 7 days,Searching Indexing,cloudsearch:DescribeDomains,Legacy search; consider OpenSearch
+CloudHSM,ClustersActive > 0,HSMsState = ACTIVE,CryptoOperations > 0,Continuous,N/A,cloudhsmv2:DescribeClusters cloudhsmv2:DescribeHsms,Expensive dedicated HSM; hourly billing
+Cloud Map,ServicesRegistered > 0,InstancesRegistered > 0,DiscoveryQueriesAPI > 100/day,Last 7 days,N/A,servicediscovery:ListServices servicediscovery:ListInstances,Service discovery; pay per query
+Directory Service,DirectoriesActive > 0,DomainControllerStatus = Active,UserAuthentications > 0,Last 7 days,N/A,ds:DescribeDirectories ds:DescribeDomainControllers,Managed AD; hourly per directory
+Elastic Transcoder,JobsCompleted > 10/month,PipelinesActive > 0,JobsSucceeded > 90%,Last 30 days,N/A,elastictranscoder:ListPipelines elastictranscoder:ListJobsByStatus,Legacy; consider MediaConvert
+Elastic Disaster Recovery,SourceServersReplicating > 0,LagDuration < 60 seconds,RecoveryInstancesLaunched >= 0,Continuous,LagDuration BackloggedStorageBytes,drs:DescribeSourceServers drs:DescribeJobs,Continuous replication; pay per server
+Identity Center,UsersActive > 0,PermissionSetsActive > 0,AccountAssignments > 0,Last 30 days,N/A,sso:ListInstances sso-admin:ListAccountAssignments,Free service; centralized SSO
+Global Accelerator,Accelerators active > 0,NewFlowCount > 100/day,HealthyEndpointCount > 0,Last 7 days,NewFlowCount ProcessedBytesOut HealthyEndpointCount,globalaccelerator:ListAccelerators,Fixed hourly + data transfer cost
+Global View,AccountsAggregated > 1,ResourcesSearched > 0,SearchQueriesExecuted > 0,Last 30 days,N/A,resource-explorer-2:Search,Free service; multi-account resource view
+Recycle Bin,RetentionRulesActive > 0,ResourcesInRecycleBin > 0,ResourcesRecovered > 0,Last 90 days,N/A,rbin:ListRules rbin:ListResourcesByRuleId,Free service; snapshot/AMI retention
+RTB Fabric,SeatbidRequests > 1000/day,BidResponses > 0,WinNotifications > 0,Last 7 days,N/A,elabd:DescribeInstances (API calls),Programmatic advertising
+CodeCatalyst,ProjectsActive > 0,WorkflowRunsCompleted > 5/month,ActiveUsers > 0,Last 30 days,N/A,codecatalyst:ListProjects codecatalyst:ListWorkflowRuns,Pay per active user/compute minute
+Console Home,ConsoleLoginEvents > 0,ActiveUsers > 0,Widgets configured > 0,Last 30 days,N/A,cloudtrail:LookupEvents (ConsoleLogin),Free service; AWS Management Console home
+Security Agent,AgentsDeployed > 0,FindingsReported > 0,AgentsOnline > 0,Last 7 days,N/A,ssm:DescribeInstanceInformation,Security monitoring agent deployment
+Security Hub CSPM,FindingsActive > 0,StandardsEnabled > 0,ComplianceScore tracked,Continuous,N/A,securityhub:DescribeHub securityhub:GetFindingAggregator,Cloud security posture management
+Security Incident Response,IncidentsActive > 0,CasesOpened > 0,ResponseTimeTracked,Continuous,N/A,security-ir:ListCases (API calls),Requires subscription; incident management
+Security Lake,DataLakeActive > 0,LogSourcesEnabled > 0,DataIngested > 1GB/day,Last 7 days,N/A,securitylake:ListDataLakes securitylake:ListLogSources,OCSF data lake; pay per GB ingested
+Private Certificate Authority,CAsActive > 0,CertificatesIssued > 0,CAStatus = ACTIVE,Last 30 days,N/A,acm-pca:ListCertificateAuthorities acm-pca:ListCertificates,Pay per CA per month + per cert
+S3 Glacier,VaultsExist > 0,ArchivesStored > 0,RetrievalJobsCompleted tracked,Last 90 days,N/A,glacier:ListVaults glacier:ListJobs,Very cheap storage; retrieval costs vary
+MQ,BrokersActive > 0,MessageCount > 100/day,ConnectionCount > 0,Last 7 days,MessageCount ConnectionCount CpuUtilization,mq:ListBrokers mq:DescribeBroker,Managed ActiveMQ/RabbitMQ; hourly billing
+Aurora DSQL,ClustersActive > 0,DatabaseConnections > 0,QueriesPerSecond > 0,Last 7 days,DatabaseConnections QueriesPerSecond,dsql:ListClusters (API calls),Serverless distributed SQL; pay per use
