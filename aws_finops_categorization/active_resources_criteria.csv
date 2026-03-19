@@ -196,3 +196,45 @@ Private Certificate Authority,CAsActive > 0,CertificatesIssued > 0,CAStatus = AC
 S3 Glacier,VaultsExist > 0,ArchivesStored > 0,RetrievalJobsCompleted tracked,Last 90 days,N/A,glacier:ListVaults glacier:ListJobs,Very cheap storage; retrieval costs vary
 MQ,BrokersActive > 0,MessageCount > 100/day,ConnectionCount > 0,Last 7 days,MessageCount ConnectionCount CpuUtilization,mq:ListBrokers mq:DescribeBroker,Managed ActiveMQ/RabbitMQ; hourly billing
 Aurora DSQL,ClustersActive > 0,DatabaseConnections > 0,QueriesPerSecond > 0,Last 7 days,DatabaseConnections QueriesPerSecond,dsql:ListClusters (API calls),Serverless distributed SQL; pay per use
+Activate,N/A,N/A,N/A,N/A,N/A,N/A,AWS startup program - credits and benefits only; no active resources or separate costs to track
+App Mesh,VirtualNodesActive > 0,TrafficRate > 100 requests/day,HealthyTargets > 0,Last 7 days,N/A,appmesh:ListMeshes appmesh:ListVirtualNodes,Service mesh; pay per vCPU hour of connected Envoy proxies
+App Runner,ServiceStatus = RUNNING,RequestCount > 100/day,ResponseTime < 5000ms,Last 7 days,RequestCount Latency ActiveInstances,apprunner:ListServices apprunner:DescribeService,Fully managed container service; pay per vCPU/memory-second
+App Studio,ApplicationsDeployed > 0,ActiveUsers > 0,ActionExecutions > 0,Last 30 days,N/A,appstudio:ListApplications (API calls),Low-code/no-code application builder; pay per active user
+AppConfig,DeploymentsCompleted > 0,ConfigurationProfilesActive > 0,EnvironmentsActive > 0,Last 30 days,N/A,appconfig:ListApplications appconfig:ListDeployments,Application configuration management; free service
+AppFabric,IngestionActive > 0,AppConnectionsActive > 0,NormalizedEventsProcessed > 0,Last 7 days,N/A,appfabric:ListAppBundles appfabric:ListIngestions,SaaS security and productivity integration; pay per event
+AppSync,GraphQLRequestsCount > 100/day,ConnectedClients > 0 (subscriptions),ErrorRate < 5%,Last 7 days,N/A,appsync:ListGraphqlApis appsync:ListApiKeys,Managed GraphQL API; pay per request and real-time updates
+Application Discovery Service,AgentsRunning > 0,ServersDiscovered > 0,DataCollected recently < 7 days,Last 30 days,N/A,discovery:DescribeAgents discovery:DescribeServers,Free migration discovery tool; pay for data export to S3
+Application Migration Service,ReplicationServersActive > 0,SourceServersReplicating > 0,LagDuration < 60 seconds,Continuous,N/A,mgn:DescribeSourceServers mgn:DescribeJobs,Free replication service; pay for launched test/cutover instances
+Billing,N/A,N/A,N/A,N/A,N/A,N/A,Free billing and cost management console - no separate billable resources to monitor
+CloudWatch Evidently,ExperimentEvaluations > 0,FeaturesActive > 0,LaunchActive > 0,Last 30 days,N/A,evidently:ListExperiments evidently:ListFeatures,Feature flags and A/B testing; pay per evaluation and event
+CloudWatch Logs,IncomingBytes > 1GB/day,IncomingLogEvents > 10000/day,LogGroupsActive > 0,Last 7 days,IncomingBytes IncomingLogEvents,logs:DescribeLogGroups logs:DescribeLogStreams,Log storage billed by ingestion and storage; archive to S3 to reduce cost
+CloudWatch Logs Insights,QueriesExecuted > 0,BytesScanned > 1GB/month,QueryDuration < 60 seconds,Last 30 days,N/A,logs:StartQuery logs:GetQueryResults,Pay per GB of log data scanned; use filters to reduce cost
+CloudWatch RUM,EventsReceived > 1000/day,SessionsRecorded > 100/day,ErrorRate < 5%,Last 7 days,N/A,rum:ListAppMonitors rum:GetAppMonitor,Real user monitoring; pay per event recorded
+CloudWatch Synthetics,CanaryRunsSucceeded > 90%,CanaryRunsCompleted > 0,CanaryDuration < timeout,Last 7 days,N/A,synthetics:DescribeCanaries synthetics:GetCanaryRuns,Canary monitoring; pay per canary run
+Cost and Usage Reports,ReportDeliveredToS3 recently < 30 days,ReportConfigured = true,S3BucketAccessible = true,Last 30 days,N/A,cur:DescribeReportDefinitions,Free CUR report service; pay for S3 storage of report data
+DataZone,DataAssetsPublished > 0,ProjectsActive > 0,DataAccessRequests > 0,Last 30 days,N/A,datazone:ListDomains datazone:ListProjects,Data governance and catalog; pay per asset and API calls
+Database Migration Service,ReplicationInstancesRunning > 0,TasksRunning > 0,ReplicationLag < 60 seconds,Continuous,N/A,dms:DescribeReplicationInstances dms:DescribeReplicationTasks,Pay per replication instance-hour; free data transfer
+Elemental Appliances & Software,N/A,N/A,N/A,N/A,N/A,N/A,On-premises hardware appliances and software licenses - managed separately from AWS cloud billing
+Elemental MediaConnect,FlowsActive > 0,OutputBandwidth > 1Mbps,FlowStatus = ACTIVE,Last 7 days,N/A,mediaconnect:ListFlows mediaconnect:DescribeFlow,Live video transport; pay per hour per flow and per GB transferred
+Elemental MediaConvert,JobsCompleted > 10/month,TranscodingMinutes > 0,JobsSucceeded > 90%,Last 30 days,N/A,mediaconvert:ListJobs mediaconvert:DescribeEndpoints,Video transcoding; pay per output minute by resolution
+Elemental MediaLive,ChannelsRunning > 0,InputBitrateActive > 0,ChannelState = RUNNING,Last 7 days,ActiveConnections InputVideoFrameRate,medialive:ListChannels medialive:DescribeChannel,Live video encoding; expensive hourly billing per channel
+Elemental MediaPackage,EndpointsServing > 0,EgressRequestCount > 100/day,OriginEndpointsActive > 0,Last 7 days,EgressBytes,mediapackage:ListChannels mediapackage:ListOriginEndpoints,Video packaging and origination; pay per GB egress
+Elemental MediaStore,ObjectsStored > 0,GetRequestsCount > 100/day,PutRequestsCount > 0,Last 14 days,N/A,mediastore:ListContainers mediastore:DescribeContainer,Media-optimized object storage; pay per GB stored and per request
+Elemental MediaTailor,OriginEndpointsConfigured > 0,AdInsertions > 0,SessionInitializationRequests > 100/day,Last 7 days,N/A,mediatailor:ListPlaybackConfigurations,Server-side ad insertion; pay per session
+Glue DataBrew,JobRunsCompleted > 0,RecipesActive > 0,DatasetsConnected > 0,Last 30 days,N/A,databrew:ListJobs databrew:ListProjects,Visual data preparation; pay per node-hour
+Health Dashboard,N/A,N/A,N/A,N/A,N/A,N/A,Free AWS service health status dashboard - no billable resources to monitor
+IQ,N/A,N/A,N/A,N/A,N/A,N/A,AWS expert marketplace - no active resources; pay experts directly outside AWS billing
+Interactive Video Service,ChannelsStreaming > 0,ConcurrentViewers > 0,IngestBitrateActive > 0,Last 7 days,IngestFrameRate LiveDecodedFrames,ivs:ListChannels ivs:GetChannel,Live video streaming; pay per channel-hour and GB delivered
+Kinesis Video Streams,StreamsActive > 0,PutMediaRequests > 0,GetMediaRequests > 0,Last 7 days,PutLatency GetMediaMillisBehindNow IncomingBytes,kinesisvideo:ListStreams kinesisvideo:DescribeStream,Video streaming and storage; pay per GB ingested and stored
+Lake Formation,DataLakeTablesRegistered > 0,DataAccessGranted > 0,CrawlerLastRun < 7 days,Last 30 days,N/A,lakeformation:ListLakeFormationOptins glue:GetTables,Free governance layer; pay for underlying Glue and S3 resources
+Launch Wizard,DeploymentsCompleted > 0,ApplicationsDeployed > 0,DeploymentStatus = COMPLETED,Last 90 days,N/A,launchwizard:ListDeployments,Free deployment wizard; pay for underlying resources launched
+Mainframe Modernization,EnvironmentsRunning > 0,ApplicationsDeployed > 0,CPUUtilization > 10%,Last 7 days,CPUUtilization MemoryUtilization,m2:ListEnvironments m2:ListApplications,Managed mainframe runtime; pay per vCPU-hour
+Marketplace,N/A,N/A,N/A,N/A,N/A,N/A,AWS Marketplace portal - no direct billable resources; pay for subscribed software via individual service charges
+Parameter Store,ParametersAccessed > 0,GetParameterAPIRequests > 100/day,ParametersCount > 0,Last 30 days,N/A,ssm:DescribeParameters ssm:GetParameterHistory,Standard parameters free; Advanced parameters billed per parameter per month
+Personal Health Dashboard,N/A,N/A,N/A,N/A,N/A,N/A,Free personalized AWS health events dashboard - no separate billable resources to monitor
+Resource Groups,N/A,N/A,N/A,N/A,N/A,N/A,Free resource grouping and tagging service - no direct costs; underlying resources billed separately
+Snow Family,JobsInProgress > 0,DataTransferredGB > 0,DeviceStatus = IN_USE,Last 90 days,N/A,snowball:ListJobs snowball:DescribeJob,Physical data transfer devices; pay per job and device-day
+Support,N/A,N/A,N/A,N/A,N/A,N/A,AWS Support plans (Developer/Business/Enterprise) - flat monthly fee; no active resource monitoring needed
+Tag Editor,N/A,N/A,N/A,N/A,N/A,N/A,Free tag management tool - no billable resources; underlying tagged resources billed separately
+Well-Architected Tool,N/A,N/A,N/A,N/A,N/A,N/A,Free architectural review framework - no billable resources to monitor
+re:Post,N/A,N/A,N/A,N/A,N/A,N/A,AWS community forum - no billable resources; re:Post Private has per-user pricing
