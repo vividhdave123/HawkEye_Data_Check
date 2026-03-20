@@ -1,0 +1,240 @@
+Service Name,Metric Type,Active Threshold,Idle Threshold,Underutilized Threshold,Unit,Recommended Evaluation Period
+EC2,CPUUtilization,> 10%,< 5%,< 30%,Percent,7 days
+RDS,DatabaseConnections,> 0,= 0,< 40% CPU utilization,Count,7 days
+DynamoDB,ConsumedReadCapacityUnits,> 0,= 0,< 30% of provisioned,Units,30 days
+S3,GetRequests,> 100/day,= 0,< 10/month per prefix,Count,90 days
+Lambda,Invocations,> 10/day,= 0,< 50% max memory used,Count,30 days
+EBS,VolumeReadOps,> 100/day,= 0,< 100/day,Count,14 days
+ElastiCache,CPUUtilization,> 10%,< 5%,< 30%,Percent,14 days
+ECS,RunningTasksCount,> 0,= 0,< 30% task CPU utilization,Count,14 days
+EKS,DesiredNodeCount,> 0,= 0,< 30% node CPU utilization,Count,14 days
+Redshift,DatabaseConnections,> 0,= 0,< 40% CPU utilization,Count,14 days
+CloudFront,Requests,> 1000/day,= 0,< 10000/day,Count/Day,30 days
+API Gateway,Count (requests),> 100/day,= 0,Low usage with provisioned cache,Count/Day,14 days
+VPC,AttachedResources,Attached resources exist,No active resources attached,N/A,N/A,30 days
+NAT Gateway,BytesOutToDestination,> 1GB/day,< 100MB/day,< 1GB/day,Bytes/Day,7 days
+Elastic Load Balancer,ActiveConnectionCount,> 10,= 0,< 100,Count,14 days
+Route 53,DNSQueries,> 1000/day,< 10/day,N/A,Count/Day,30 days
+CloudWatch,MetricCount,> 0,= 0,N/A,Count,30 days
+CloudTrail,EventCount,> 100/day,= 0,N/A,Count,30 days
+IAM,N/A - Identity service,Users/Roles used within 90 days,N/A,N/A,N/A,90 days
+KMS,NumberOfDecryptCalls,> 0,= 0,Key enabled with low API calls,Count,30 days
+Secrets Manager,GetSecretValue API calls,> 0,= 0,Low rotation frequency,Count,30 days
+SNS,NumberOfMessagesPublished,> 100/day,= 0,< 100/day,Count/Day,30 days
+SQS,NumberOfMessagesSent,> 10/day,= 0,< 100/day,Count/Day,30 days
+Kinesis,IncomingRecords,> 1000/day,= 0,Iterator age low (shard over-provisioned),Count,14 days
+Athena,DataScannedInBytes,> 1GB/day,= 0,Low total execution time,Bytes/Day,30 days
+Glue,JobRuns,> 0,= 0,< 30% of max capacity per job run,Count,30 days
+EMR,ClusterState,RUNNING or WAITING,WAITING > 3 days,< 40% core node CPU,N/A,14 days
+SageMaker,Invocations,> 100/day,= 0,< 30% CPU on endpoint,Count,14 days
+Step Functions,ExecutionsStarted,> 10/day,= 0,< 10/day,Count/Day,30 days
+EFS,ClientConnections,> 0,= 0,< 1GB/day data read,Count,30 days
+FSx,DataReadBytes,> 1GB/day,= 0,< 1GB/day,Bytes/Day,14 days
+Backup,BackupJobsCompleted,> 0,= 0,Low relative to backup plan,Count,30 days
+CloudFormation,StackStatus,CREATE_COMPLETE or UPDATE_COMPLETE,ROLLBACK_COMPLETE or no updates,N/A,N/A,90 days
+Config,ConfigurationRecorderStatus,Recording,= 0 rules evaluated,N/A,N/A,30 days
+Systems Manager,RunCommandInvocations,> 0,= 0,N/A,Count,14 days
+WorkSpaces,ConnectionAttempts,AVAILABLE state,= 0 connections,< 30% CPU usage,Count,14 days
+AppStream,ActiveSessions,Fleet RUNNING,= 0 sessions,ActualCapacity > MaxUserCapacity * 1.5,Count,14 days
+Direct Connect,BytesIn,ConnectionState = available,< 1MB/day,< 30% bandwidth utilization,Bytes/Day,7 days
+VPN,TunnelDataIn,Tunnel UP,< 10MB/day,< 100MB/day,Bytes/Day,14 days
+Transit Gateway,BytesIn,> 1GB/day,< 100MB/day,< 1GB/day,Bytes/Day,14 days
+DocumentDB,DatabaseConnections,> 0,= 0,< 40% CPU utilization,Count,14 days
+Neptune,Queries,> 100/day,= 0,< 40% CPU utilization,Count/Day,14 days
+Timestream,SuccessfulRequestLatency,Active queries,No queries,Low system errors,Milliseconds,30 days
+QLDB,UserRequests,> 0,= 0,Low command latency,Count,30 days
+Keyspaces,ReadCapacityUnits,> 0,= 0,< 30% of provisioned,Units,30 days
+MemoryDB,Commands,> 1000/day,= 0,< 30% CPU utilization,Count,14 days
+OpenSearch,SearchRate,> 100/day,= 0,< 40% CPU utilization,Count/Day,14 days
+MSK,BytesInPerSec,> 1MB/sec,= 0,< 30% CPU user,Bytes/Sec,14 days
+EventBridge,Invocations,> 100/day,= 0,< 100/day,Count/Day,30 days
+AppFlow,FlowExecutionsStarted,> 0,= 0,< 5/day,Count,30 days
+DataSync,TaskExecutions,> 0,= 0,< 1GB/day bytes transferred,Count,30 days
+Transfer Family,BytesIn,> 1GB/day,= 0,< 100MB/day,Bytes/Day,30 days
+Storage Gateway,CloudBytesUploaded,> 1GB/day,= 0,CacheHitPercent > 80% but gateway oversized,Bytes/Day,14 days
+Lightsail,CPUUtilization,Instance running,< 2%,< 30%,Percent,14 days
+CodeBuild,Builds,> 10/month,= 0,< 30% of build timeout duration,Count,30 days
+CodePipeline,PipelineExecutions,> 5/month,= 0,N/A,Count,30 days
+CodeDeploy,Deployments,> 5/month,= 0,N/A,Count,30 days
+CodeCommit,GitPushes,> 5/month,= 0,N/A,Count,30 days
+CodeArtifact,PackageDownloads,> 100/month,= 0,N/A,Count,30 days
+ECR,ImagePush,> 5/month,= 0,N/A,Count,30 days
+Amplify,BuildMinutes,> 0,= 0,N/A,Minutes,30 days
+Cloud9,EnvironmentStatus,Running,= 0 user activity,N/A,N/A,14 days
+X-Ray,TracesIndexed,> 100/day,= 0,N/A,Count/Day,30 days
+GuardDuty,DetectorStatus,Enabled,= 0 findings (90 days),N/A,N/A,90 days
+Macie,ClassificationJobs,Running,= 0 jobs,N/A,N/A,30 days
+Security Hub,FindingsReceived,Enabled in region,= 0 findings,N/A,N/A,30 days
+Inspector,AssessmentStatus,Active,= 0 assessments,N/A,N/A,30 days
+Detective,VolumeUsageInBytes,Enabled,= 0 (no data),N/A,N/A,30 days
+WAF,WebACLRequests,WebACL associated,= 0 requests evaluated,< 1000/day per WebACL,Count/Day,30 days
+Shield,DDoSDetected,Shield Advanced enabled,= 0 events (90 days),N/A,N/A,90 days
+Firewall Manager,PolicyStatus,Policies active,No compliance issues,N/A,N/A,30 days
+Network Firewall,PacketsPassedFirewall,Firewall associated with VPC,= 0,< 1GB/day bytes processed,Count,14 days
+Certificate Manager,CertificateStatus,ISSUED,ISSUED but not associated,N/A,N/A,30 days
+Organizations,AccountCount,> 1,N/A,N/A,Count,N/A
+Control Tower,LandingZoneStatus,Deployed,N/A,N/A,N/A,N/A
+Service Catalog,ProvisionedProducts,> 0,= 0,N/A,Count,30 days
+License Manager,LicensesTracked,> 0,= 0 consumed,N/A,Count,30 days
+Trusted Advisor,CheckStatus,Checks run (Business/Enterprise),N/A,N/A,N/A,7 days
+Compute Optimizer,RecommendationStatus,Recommendations generated,N/A,N/A,N/A,14 days
+Cost Explorer,APICallCount,> 0,N/A,N/A,Count,30 days
+Budgets,BudgetsConfigured,> 0,N/A,N/A,Count,N/A
+Grafana,WorkspaceStatus,Active,= 0 dashboards accessed,< 2 active editors,Count,30 days
+Prometheus,WorkspaceStatus,Active,= 0 metrics ingested,< 50% of ingestion limit,Count,30 days
+DevOps Guru,InsightsGenerated,> 0,= 0,N/A,Count,30 days
+Resilience Hub,ApplicationsAssessed,> 0,= 0 assessments,N/A,Count,90 days
+Fault Injection Simulator,ExperimentsRun,> 0,= 0,N/A,Count,90 days
+Incident Manager,ResponsePlans,Configured,No incidents recorded,N/A,N/A,30 days
+FinSpace,EnvironmentsActive,> 0,= 0 datasets queried,ComputeNodeCount > minimum,Count,30 days
+HealthLake,DataStoresActive,> 0,= 0 FHIR resources created,Active with low query volume,Count,30 days
+HealthOmics,WorkflowsRun,> 0,= 0,StorageType = REFERENCE with low access,Count,30 days
+HealthImaging,ImageSetsStored,> 0,Stored but not accessed,Low retrieval rate,Count,30 days
+Clean Rooms,CollaborationsActive,> 0,= 0 queries,Active with few queries,Count,30 days
+Entity Resolution,MatchingWorkflowsRun,> 0,= 0,< 2/week,Count,30 days
+Data Exchange,DataSetsAccessed,> 0,Not accessed,Subscription with low API calls,Count,30 days
+Data Firehose,IncomingRecords,> 1000/day,= 0,< 1MB/hour bytes incoming,Count/Day,14 days
+Pinpoint,MessagesSent,> 100/day,= 0,< 100/day,Count/Day,30 days
+Simple Email Service,EmailsSent,> 100/day,= 0,< 10% of sending limit,Count/Day,30 days
+Chime,MeetingsHosted,> 0,= 0,N/A,Count,30 days
+Connect,ContactsHandled,> 100/day,= 0,Low concurrent contact volume,Count/Day,14 days
+WorkDocs,DocumentsAccessed,> 0,= 0,N/A,Count,30 days
+WorkMail,EmailsSentReceived,> 100/day,= 0,N/A,Count/Day,30 days
+GameLift,GameSessions,Fleets active,= 0,< 30% EC2 utilization,Count,14 days
+Managed Blockchain,Transactions,Network active,= 0,< 20% storage provisioned,Count,30 days
+Ground Station,ContactsScheduled,> 0,= 0,< 2/week,Count,90 days
+IoT Core,MessagesPublished,> 1000/day,= 0,< 1000/day,Count/Day,14 days
+IoT Analytics,MessagesIngested,> 0,= 0,< 1000/day,Count/Day,30 days
+IoT Greengrass,DeploymentStatus,Deployments successful,Not updated,Components > minimum needed,Count,30 days
+IoT SiteWise,AssetMeasurements,> 0,= 0 data points,Assets > active use,Count,14 days
+Lookout for Equipment,InferenceExecutions,> 0,= 0,ModelCount > active models,Count,30 days
+Kendra,Queries,> 100/day,= 0,< 1 IndexStorageCapacityUnit with low queries,Count/Day,30 days
+Lex,Conversations,> 100/day,= 0,High MissedUtteranceCount,Count/Day,30 days
+Polly,CharactersSynthesized,> 10000/day,= 0,< 100000/month,Count,30 days
+Transcribe,AudioMinutesTranscribed,> 100/day,= 0,< 1 hour/day,Minutes/Day,30 days
+Translate,CharactersTranslated,> 100000/day,= 0,< 100000/day,Count/Day,30 days
+Comprehend,TextAnalyzed,> 1MB/day,= 0,< 1000 documents/day classified,MB/Day,30 days
+Rekognition,ImagesAnalyzed,> 1000/day,= 0,< 1000/day,Count/Day,30 days
+Textract,DocumentsAnalyzed,> 100/day,= 0,< 100/day pages processed,Count/Day,30 days
+Forecast,ForecastsGenerated,> 0,= 0,DatasetGroupCount > active use,Count,30 days
+Personalize,CampaignsDeployed,Deployed,No recommendations served,> 1 solution version,Count,30 days
+Fraud Detector,Predictions,> 1000/day,= 0,ModelVersionCount > active use,Count/Day,30 days
+Bedrock,ModelInvocations,> 100/day,= 0,< 100/day,Count/Day,30 days
+SageMaker,CPUUtilization,> 10% on endpoint,= 0 invocations,< 30% CPU on notebook,Percent,14 days
+Batch,JobsSubmitted,> 10/month,= 0,< 40% CPU on compute environment,Count,30 days
+Managed Apache Airflow,DAGsExecuted,> 0,= 0,< 30% scheduler CPU usage,Count,14 days
+Managed Apache Flink,ApplicationStatus,Running,= 0 records processed,< 30% CPU utilization,N/A,7 days
+Deadline Cloud,JobsSubmitted,> 10/month,= 0,FleetCapacity > active render jobs,Count,30 days
+IoT Device Management,FleetsManaged,> 0,= 0 jobs executed,FleetIndexing with few queries,Count,30 days
+IoT Device Defender,AuditFindings,> 0 OR ViolationsActive > 0,= 0,DAILY audit with stable fleet,Count,30 days
+IoT Events,DetectorModelsActive,> 0,Active but no events,DetectorModelCount > active use,Count,14 days
+IoT FleetWise,VehiclesRegistered,> 0,Registered but no data,VehicleCount > active vehicles,Count,30 days
+IoT TwinMaker,WorkspacesActive,> 0,= 0 entities queried,WorkspaceCount > 1,Count,30 days
+Monitron,ProjectsActive,> 0,= 0 sensor readings,ProjectCount > active projects,Count,30 days
+Panorama,AppliancesOnline,> 0,Models deployed but no video,DeviceCount > active deployments,Count,14 days
+Comprehend Medical,DetectEntitiesV2Calls,> 100/day,= 0,< 100/day medical entities extracted,Count/Day,30 days
+Augmented AI,HumanLoopsActive,> 0,= 0,< 10/day human loops,Count,30 days
+Bedrock AgentCore,AgentInvocations,> 100/day,= 0,< 50/day,Count/Day,7 days
+Q Business,Conversations,> 100/day,= 0,Active with low queries,Count/Day,30 days
+Q Developer,CodeSuggestionsAccepted,> 10/day,= 0,N/A,Count/Day,7 days
+Nova Act,AgentRuns,> 10/day,= 0,N/A,Count/Day,7 days
+Amazon Q,Queries,> 100/day,= 0,N/A,Count/Day,30 days
+DevOps Agent,AgentInvocations,> 10/month,= 0,N/A,Count,30 days
+Service Quotas,QuotaRequestsSubmitted,> 0,N/A,N/A,Count,90 days
+Resource Access Manager,ResourceSharesActive,> 0,= 0,N/A,Count,30 days
+Resource Explorer,SearchesExecuted,> 0,N/A,N/A,Count,30 days
+Infrastructure Composer,TemplatesCreated,> 0,N/A,N/A,Count,90 days
+Serverless Application Repository,ApplicationsDeployed,> 0,= 0,N/A,Count,90 days
+Proton,EnvironmentsDeployed,> 0,= 0,N/A,Count,30 days
+Data Transfer Terminal,TransfersInitiated,> 0,= 0,N/A,Count,30 days
+Supply Chain,ForecastsGenerated,> 0,= 0,InstanceCount > minimum,Count,30 days
+Partner Central,OpportunitiesActive,> 0,= 0,N/A,Count,30 days
+Payment Cryptography,KeysActive,> 0,Active but no operations,KeyCount > active use,Count,30 days
+Verified Permissions,AuthorizationRequests,> 100/day,= 0,PolicyStoreCount > 1,Count/Day,7 days
+User Notifications,NotificationsSent,> 100/day,N/A,N/A,Count/Day,7 days
+End User Messaging,MessagesSent,> 100/day,= 0,< 100/day,Count/Day,30 days
+Chime SDK,MediaSessionsActive,> 0,= 0,N/A,Count,7 days
+WorkSpaces Applications,ApplicationsDeployed,> 0,= 0 app instances,N/A,Count,30 days
+WorkSpaces Secure Browser,PortalsActive,> 0,= 0 browser sessions,ActivePortals > minimum use,Count,14 days
+WorkSpaces Thin Client,DevicesActive,> 0,= 0,DeviceCount > active users,Count,30 days
+Red Hat OpenShift Service on AWS,CPUUtilization,Clusters running > 0,< 5%,< 30%,Percent,14 days
+Elastic VMware Service,VMCPUUtilization,VMs running > 0,< 5%,< 30%,Percent,14 days
+Oracle Database@AWS,CPUUtilization,Databases active > 0,= 0 connections,< 40%,Percent,14 days
+Outposts,InstancesRunning,> 0 on Outpost,= 0,< 30% server utilization,Count,14 days
+One Enterprise,LicensesActive,> 0,N/A,N/A,Count,30 days
+Wickr,ActiveUsers,> 0,= 0,N/A,Count,30 days
+SimSpace Weaver,SimulationsRunning,> 0,= 0,< 40% simulation CPU,Count,30 days
+Parallel Computing Service,ClustersActive,> 0,Active but no jobs,< 40% cluster CPU,Count,30 days
+Telco Network Builder,NetworkInstancesActive,> 0,Active but no traffic,NetworkFunctionCount > active deployments,Count,30 days
+Braket,TasksExecuted,> 0,= 0,< 5/week tasks completed,Count,30 days
+Signer,SigningJobsCompleted,> 0,= 0,N/A,Count,30 days
+Artifact,AgreementsAccepted,> 0,N/A,N/A,Count,90 days
+Audit Manager,FrameworksActive,> 0,= 0 assessments,FrameworkCount > active assessments,Count,30 days
+Billing Conductor,BillingGroupsActive,> 0,Active but no reports,N/A,Count,30 days
+B2B Data Interchange,PartnershipsActive,> 0,= 0 transactions processed,< 5/day transformation jobs,Count,30 days
+Auto Scaling,AutoScalingGroupsActive,> 0,N/A,N/A,Count,7 days
+SWF,WorkflowExecutionsOpen,> 0,= 0,< 10/day executions,Count,30 days
+CloudShell,SessionsLaunched,> 0,N/A,N/A,Count,30 days
+CloudSearch,SearchRequests,> 100/day,= 0,IndexDocumentCount > active queries,Count/Day,14 days
+CloudHSM,ClustersActive,> 0,Active but no crypto operations,HSMCount > 2 with low operations,Count,14 days
+Cloud Map,ServicesRegistered,> 0,Registered but no queries,NamespaceCount > 1 with low discovery,Count,30 days
+Directory Service,DirectoriesActive,> 0,Active but no authentications,< 30% CPU utilization,Count,14 days
+Elastic Transcoder,JobsCompleted,> 10/month,= 0,< 5/day,Count,30 days
+Elastic Disaster Recovery,SourceServersReplicating,> 0,= 0,LaunchTemplateCount > active recovery plans,Count,30 days
+Identity Center,UsersActive,> 0,N/A,N/A,Count,30 days
+Global Accelerator,AcceleratorsActive,> 0,= 0 new flows,AcceleratorCount > active endpoints,Count,14 days
+Global View,AccountsAggregated,> 1,N/A,N/A,Count,30 days
+Recycle Bin,RetentionRulesActive,> 0,N/A,RetentionRuleCount > 5,Count,90 days
+RTB Fabric,SeatbidRequests,> 1000/day,= 0,N/A,Count/Day,14 days
+CodeCatalyst,ProjectsActive,> 0,= 0 workflow runs,N/A,Count,30 days
+Console Home,N/A - Console-only,N/A,N/A,N/A,N/A,N/A
+Security Agent,AgentsDeployed,> 0,= 0 agents online,N/A,Count,7 days
+Security Hub CSPM,FindingsActive,> 0,= 0,N/A,Count,30 days
+Security Incident Response,IncidentsActive,> 0,= 0,N/A,Count,30 days
+Security Lake,DataLakeActive,> 0,= 0 data ingested,StorageBytes > 0 with low query frequency,Count,14 days
+Private Certificate Authority,CAsActive,> 0,Active but no certs issued,< 10 certs/month,Count,30 days
+S3 Glacier,VaultsExist,> 0,Archives stored but no retrievals,< 1 retrieval/month,Count,90 days
+MQ,BrokersActive,> 0,= 0 messages,< 30% CPU utilization,Count,14 days
+Aurora DSQL,DatabaseConnections,> 0,= 0,ComputeCapacity > minimum,Count,14 days
+Activate,N/A - Program only,N/A,N/A,N/A,N/A,N/A
+App Mesh,VirtualNodesActive,> 0,= 0 traffic (no requests),VirtualNodeCount > active services,Count,14 days
+App Runner,RequestCount,> 0,= 0,< 30% CPU utilization,Count,7 days
+App Studio,ApplicationsDeployed,> 0,= 0 active users,N/A,Count,30 days
+AppConfig,DeploymentsCompleted,> 0,= 0,< 2/week deployments,Count,30 days
+AppFabric,IngestionActive,> 0,= 0 normalized events,ConnectorCount > active integrations,Count,14 days
+AppSync,GraphQLRequestsCount,> 100/day,= 0,High 4XX error rate with low request volume,Count/Day,14 days
+Application Discovery Service,AgentsRunning,> 0,= 0,N/A,Count,30 days
+Application Migration Service,ReplicationServersActive,> 0,= 0,SourceServerCount > active migrations,Count,30 days
+Billing,N/A - Billing service,N/A,N/A,N/A,N/A,N/A
+CloudWatch Evidently,ExperimentEvaluations,> 0,= 0,FeatureCount > active experiments,Count,30 days
+CloudWatch Logs,IncomingBytes,> 1GB/day,= 0,< 1MB/day per log group,Bytes/Day,30 days
+CloudWatch Logs Insights,QueriesExecuted,> 0,= 0,N/A,Count,30 days
+CloudWatch RUM,EventsReceived,> 1000/day,= 0,AppMonitorCount > active web apps,Count/Day,30 days
+CloudWatch Synthetics,CanaryRunsSucceeded,> 90%,= 0 canary runs,CanaryCount > active endpoints,Percent,14 days
+Cost and Usage Reports,ReportDeliveredToS3,< 30 days since delivery,N/A,N/A,N/A,30 days
+DataZone,DataAssetsPublished,> 0,= 0,DomainCount > 1,Count,30 days
+Database Migration Service,ReplicationInstancesRunning,> 0,Running but no tasks,Instance class oversized,Count,14 days
+Elemental Appliances & Software,N/A - Hardware service,N/A,N/A,N/A,N/A,N/A
+Elemental MediaConnect,OutputBandwidth,> 0,= 0,Active flows with low bitrate,Bits/Sec,14 days
+Elemental MediaConvert,JobsCompleted,> 10/month,= 0,< 10/day,Count,30 days
+Elemental MediaLive,InputBitrate,Channels running > 0,= 0 active bitrate,< 30% of provisioned input bitrate,Bits/Sec,14 days
+Elemental MediaPackage,EgressRequestCount,> 0,= 0,OriginEndpointCount > active CDN distributions,Count,14 days
+Elemental MediaStore,ObjectsStored,> 0,= 0,ObjectCount > 0 with low access,Count,30 days
+Elemental MediaTailor,SessionInitializationRequests,> 0,= 0,ChannelCount > active broadcasts,Count,30 days
+Glue DataBrew,JobRunsCompleted,> 0,= 0,ProfileJobCount > active datasets,Count,30 days
+Health Dashboard,N/A - Status service,N/A,N/A,N/A,N/A,N/A
+IQ,N/A - Consulting service,N/A,N/A,N/A,N/A,N/A
+Interactive Video Service,ConcurrentViewers,> 0,= 0,ChannelCount > 1 with low viewers,Count,14 days
+Kinesis Video Streams,PutMediaRequests,> 0,= 0,< 1GB/day PutMedia bytes,Count,14 days
+Lake Formation,DataLakeTablesRegistered,> 0,N/A,N/A,Count,30 days
+Launch Wizard,DeploymentsCompleted,> 0,N/A,N/A,Count,90 days
+Mainframe Modernization,EnvironmentsRunning,> 0,< 5% CPU utilization,< 30% runtime environment CPU,Count,14 days
+Marketplace,N/A - Marketplace service,N/A,N/A,N/A,N/A,N/A
+Parameter Store,ParametersAccessed,> 0,= 0,N/A,Count,30 days
+Personal Health Dashboard,N/A - Status service,N/A,N/A,N/A,N/A,N/A
+Resource Groups,N/A - Management service,N/A,N/A,N/A,N/A,N/A
+Snow Family,JobsInProgress,> 0,Device RETURNED or no jobs,N/A,Count,90 days
+Support,N/A - Support service,N/A,N/A,N/A,N/A,N/A
+Tag Editor,N/A - Management service,N/A,N/A,N/A,N/A,N/A
+Well-Architected Tool,N/A - Review tool,N/A,N/A,N/A,N/A,N/A
+re:Post,N/A - Community service,N/A,N/A,N/A,N/A,N/A
