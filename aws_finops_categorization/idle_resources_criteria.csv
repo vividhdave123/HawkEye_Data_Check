@@ -1,0 +1,240 @@
+Service Name,Criteria 1,Criteria 2,Criteria 3,Time Window,Cost Impact,CloudWatch Metrics Required,API Calls Required,Recommendation
+EC2,CPUUtilization < 5%,NetworkIn < 100KB/day AND NetworkOut < 100KB/day,State = running,Last 7 days,High,CPUUtilization NetworkIn NetworkOut,ec2:DescribeInstances ec2:DescribeInstanceStatus,Stop instance (if needed later) or Terminate (if no longer needed) - High hourly cost waste
+RDS,DatabaseConnections = 0,ReadIOPS = 0 AND WriteIOPS = 0,DBInstanceStatus = available,Last 7 days,High,DatabaseConnections ReadIOPS WriteIOPS,rds:DescribeDBInstances,Stop instance (if needed later) or Delete (if no longer needed) - High hourly cost waste
+DynamoDB,ConsumedReadCapacityUnits = 0,ConsumedWriteCapacityUnits = 0,TableStatus = ACTIVE,Last 30 days,Low,ConsumedReadCapacityUnits ConsumedWriteCapacityUnits,dynamodb:ListTables dynamodb:DescribeTable,Delete unused table or switch to on-demand - Provisioned capacity waste
+S3,GetRequests = 0 AND PutRequests = 0,NumberOfObjects = 0 OR BucketSizeBytes = 0,Bucket exists,Last 30 days,Low,GetRequests PutRequests NumberOfObjects BucketSizeBytes,s3:ListBuckets s3:ListObjectsV2,Delete empty bucket or apply lifecycle policy - Minimal cost but cleanup
+Lambda,Invocations = 0,Errors = 0 (no activity),FunctionExists = true,Last 30 days,Low,Invocations Errors,lambda:ListFunctions,Delete unused function - No cost when not invoked but cleanup
+EBS,VolumeReadOps = 0,VolumeWriteOps = 0,State = available (unattached),Last 14 days,Medium,VolumeReadOps VolumeWriteOps,ec2:DescribeVolumes,Delete unattached volume if not needed - Storage cost waste
+ElastiCache,CPUUtilization < 5%,CacheHits = 0,ClusterStatus = available,Last 7 days,Medium,CPUUtilization CacheHits NetworkBytesIn,elasticache:DescribeCacheClusters,Delete cluster if unused - Node hour charges even when idle
+ECS,RunningTasksCount = 0,CPUUtilization = 0 (no tasks),ClusterStatus = ACTIVE,Last 7 days,Medium,RunningTasksCount CPUUtilization,ecs:ListClusters ecs:DescribeClusters,Delete empty cluster - No cost for cluster itself but clean up unused resources
+EKS,DesiredNodeCount = 0 OR RunningPodCount = 0,NodeGroupStatus = inactive OR no active pods,ClusterStatus = ACTIVE,Last 7 days,High,CPUUtilization MemoryUtilization,eks:DescribeCluster eks:ListNodegroups,Delete cluster if no workloads - Control plane + node costs
+Redshift,DatabaseConnections = 0,QueriesCompletedPerSecond = 0,ClusterStatus = available,Last 3 days,High,DatabaseConnections QueriesCompletedPerSecond CPUUtilization,redshift:DescribeClusters,Delete cluster if unused - Very high hourly cost even when idle
+CloudFront,Requests = 0,BytesDownloaded = 0,DistributionEnabled = true,Last 14 days,Medium,Requests BytesDownloaded 4xxErrorRate,cloudfront:ListDistributions,Disable or delete distribution if no traffic - Request and data transfer costs
+API Gateway,Count = 0 (no requests),4XXError = 0 AND 5XXError = 0 (no activity),API exists,Last 14 days,Low,Count 4XXError 5XXError,apigateway:GetRestApis,Delete unused API - Pay per request only
+VPC,No active resources attached,NetworkIn = 0 AND NetworkOut = 0,VPC exists,Last 30 days,Low,N/A,ec2:DescribeVpcs ec2:DescribeSubnets,Review and delete if no resources attached - Minimal cost but cleanup
+NAT Gateway,BytesOutToDestination < 100MB/day,ActiveConnectionCount < 5,State = available,Last 3 days,High,BytesOutToDestination ActiveConnectionCount,ec2:DescribeNatGateways,Delete NAT Gateway if no traffic - High hourly cost
+Elastic Load Balancer,ActiveConnectionCount = 0,RequestCount = 0,State = active,Last 7 days,High,ActiveConnectionCount RequestCount ProcessedBytes,elbv2:DescribeLoadBalancers,Delete load balancer if no traffic - Hourly charges even when idle
+Route 53,Queries < 10/day (per hosted zone),HealthCheckStatus not checked,RecordSetCount > 0 but no queries,Last 30 days,Low,DNSQueries,route53:ListHostedZones,Delete unused hosted zones - Per hosted zone monthly fee
+CloudWatch,MetricCount = 0,No alarms triggered,Alarms in insufficient-data state,Last 30 days,Low,N/A,cloudwatch:DescribeAlarms logs:DescribeLogGroups,Review custom metrics and alarms - Custom metrics cost per metric per month
+CloudTrail,EventCount = 0,Trail enabled but no events captured,Trail enabled = true,Last 14 days,Low,N/A,cloudtrail:DescribeTrails cloudtrail:GetTrailStatus,Disable trail if not needed - Data event costs
+IAM,N/A,N/A,N/A,N/A,N/A,N/A,iam:GetCredentialReport,Free service - no idle cost concern
+KMS,NumberOfDecryptCalls = 0 AND NumberOfEncryptCalls = 0,API request count = 0,Keys enabled,Last 30 days,Low,N/A,kms:ListKeys kms:DescribeKey,Schedule key deletion if unused - Per key per month charge
+Secrets Manager,GetSecretValue API calls = 0,Secret not accessed in time window,Secret exists,Last 30 days,Low,N/A,secretsmanager:ListSecrets secretsmanager:DescribeSecret,Delete unused secret - Per secret per month charge
+SNS,NumberOfMessagesPublished = 0,NumberOfNotificationsDelivered = 0,Active subscriptions > 0,Last 30 days,Low,NumberOfMessagesPublished NumberOfNotificationsDelivered,sns:ListTopics,Delete unused topics - Pay per request but review subscriptions
+SQS,NumberOfMessagesSent = 0,NumberOfMessagesReceived = 0,Queue exists,Last 30 days,Low,NumberOfMessagesSent NumberOfMessagesReceived,sqs:ListQueues sqs:GetQueueAttributes,Delete unused queues - Pay per request only
+Kinesis,IncomingRecords = 0,GetRecords.Success = 0,StreamStatus = ACTIVE,Last 7 days,Medium,IncomingRecords GetRecords.Success IncomingBytes,kinesis:ListStreams kinesis:DescribeStream,Delete unused stream - Hourly shard costs
+Athena,DataScannedInBytes = 0,QueryExecutions = 0,WorkGroup exists,Last 30 days,Low,N/A,athena:ListQueryExecutions,Review workgroup - No cost when not querying
+Glue,JobRuns = 0,DPUHours = 0,Jobs exist,Last 30 days,Low,N/A,glue:GetJobs glue:GetJobRuns,Delete unused jobs/crawlers - Pay per DPU hour only
+EMR,ClusterState = WAITING,Steps completed = 0 in time window,IsIdle = true,Last 3 days,High,IsIdle YARNMemoryAvailablePercentage,emr:ListClusters emr:DescribeCluster,Terminate idle cluster - High hourly cost
+SageMaker,Invocations = 0 (endpoints),ModelLatency = N/A (no requests),EndpointStatus = InService,Last 7 days,High,Invocations ModelLatency CPUUtilization,sagemaker:ListEndpoints sagemaker:ListTrainingJobs,Delete endpoint if unused - High hourly instance costs
+Step Functions,ExecutionsStarted = 0,ExecutionsFailed = 0 (no activity),StateMachineExists = true,Last 30 days,Low,ExecutionsStarted ExecutionsFailed,states:ListStateMachines states:ListExecutions,Delete unused state machines - Pay per state transition only
+EFS,ClientConnections = 0,DataReadIOBytes = 0 AND DataWriteIOBytes = 0,FileSystemState = available,Last 14 days,Medium,ClientConnections DataReadIOBytes DataWriteIOBytes,elasticfilesystem:DescribeFileSystems,Delete filesystem or apply lifecycle policy - Storage cost per GB
+FSx,DataReadBytes = 0,DataWriteBytes = 0,FileSystemState = AVAILABLE,Last 14 days,High,DataReadBytes DataWriteBytes,fsx:DescribeFileSystems,Delete filesystem if no data access - High hourly cost
+Backup,BackupJobsCompleted = 0,RecoveryPointsCreated = 0,BackupVaultExists = true,Last 30 days,Low,N/A,backup:ListBackupJobs backup:ListRecoveryPointsByBackupVault,Delete outdated recovery points - Storage cost waste
+CloudFormation,StackStatus = ROLLBACK_COMPLETE OR no updates,Stack resources exist but unused,StackStatus tracked,Last 90 days,Low,N/A,cloudformation:ListStacks cloudformation:DescribeStacks,Delete stacks with no active updates if unused - Underlying resource costs
+Config,ConfigRulesEvaluated = 0,No compliance changes detected,ConfigurationRecorderStatus = Recording,Last 30 days,Low,N/A,config:DescribeConfigurationRecorderStatus,Review and disable if not needed - Per configuration item recorded cost
+Systems Manager,RunCommandInvocations = 0,SessionsStarted = 0 (Session Manager),ManagedInstancesOnline > 0,Last 14 days,Low,N/A,ssm:DescribeInstanceInformation ssm:ListCommands,Review and deactivate unused associations/documents - Minimal but cleanup
+WorkSpaces,ConnectionAttempts = 0,UserConnectedTime = 0,WorkSpace in AVAILABLE state,Last 7 days,High,Available InSessionLatency SessionDisconnect,workspaces:DescribeWorkspaces,Stop AlwaysOn workspace or terminate if unused - High monthly cost per workspace
+AppStream,ActiveSessions = 0,CapacityUtilization = 0,Fleet State = RUNNING,Last 7 days,High,ActualCapacity AvailableCapacity InUseCapacity,appstream:DescribeFleets,Switch Always-On to On-Demand or delete fleet - Hourly always-on cost
+Direct Connect,BytesIn < 1MB/day AND BytesOut < 1MB/day,Virtual interface state = no traffic,ConnectionState = available,Last 7 days,High,ConnectionBpsEgress ConnectionBpsIngress,directconnect:DescribeConnections,Delete connection if no traffic - High monthly port fee
+VPN,TunnelDataIn < 10MB/day,TunnelDataOut < 10MB/day,TunnelState = UP,Last 7 days,High,TunnelDataIn TunnelDataOut TunnelState,ec2:DescribeVpnConnections,Delete VPN connection if no traffic - Hourly charges
+Transit Gateway,BytesIn < 100MB/day,BytesOut < 100MB/day,Attachments in available state > 0,Last 7 days,High,BytesIn BytesOut PacketsIn PacketsOut,ec2:DescribeTransitGateways,Delete attachments or gateway if unused - Per attachment + data processing cost
+DocumentDB,DatabaseConnections = 0,ReadIOPS = 0 AND WriteIOPS = 0,DBClusterStatus = available,Last 7 days,High,DatabaseConnections ReadIOPS WriteIOPS,docdb:DescribeDBClusters,Delete cluster if unused - High hourly cost
+Neptune,Queries = 0,GremlinRequestsPerSec = 0 AND SparqlRequestsPerSec = 0,ClusterStatus = available,Last 7 days,High,GremlinRequestsPerSec SparqlRequestsPerSec,neptune:DescribeDBClusters,Delete cluster if unused - High hourly cost
+Timestream,SuccessfulRequestLatency = N/A (no queries),SystemErrors = 0 (no activity),Tables exist,Last 30 days,Medium,SuccessfulRequestLatency SystemErrors,timestream:ListDatabases,Delete unused tables/databases - Memory store has hourly cost
+QLDB,UserRequests = 0,JournalStorage not growing,Ledger State = ACTIVE,Last 30 days,Medium,N/A,qldb:ListLedgers qldb:DescribeLedger,Delete ledger if unused - Hourly storage charge
+Keyspaces,ReadCapacityUnits = 0,WriteCapacityUnits = 0,Tables exist,Last 30 days,Low,UserErrors SystemErrors SuccessfulRequestLatency,cassandra:SELECT (CQL queries),Delete unused tables - Provisioned capacity waste
+MemoryDB,Commands = 0,CPUUtilization < 1%,ClusterStatus = available,Last 7 days,High,CPUUtilization Commands NetworkBytesIn,memorydb:DescribeClusters,Delete cluster if unused - High hourly node costs
+OpenSearch,SearchRate = 0,IndexingRate = 0,ClusterStatus = available,Last 7 days,High,SearchRate IndexingRate CPUUtilization,opensearch:DescribeDomain,Delete domain if unused - High hourly instance costs
+MSK,BytesInPerSec = 0,BytesOutPerSec = 0,ClusterState = ACTIVE,Last 7 days,High,BytesInPerSec BytesOutPerSec CPUUser,kafka:ListClusters,Delete cluster if unused - Hourly broker costs
+EventBridge,Invocations = 0,MatchedEvents = 0,Rules exist but not triggered,Last 30 days,Low,Invocations FailedInvocations MatchedEvents,events:ListRules,Delete unused event rules and buses - Pay per event
+AppFlow,FlowExecutionsStarted = 0,RecordsProcessed = 0,Flows exist,Last 30 days,Low,FlowExecutionsStarted RecordsProcessed,appflow:ListFlows,Delete unused flows - Pay per flow run and record
+DataSync,TaskExecutions = 0,FilesTransferred = 0,Tasks exist,Last 30 days,Low,N/A,datasync:ListTasks datasync:ListTaskExecutions,Delete unused tasks - Pay per GB transferred only
+Transfer Family,BytesIn = 0,BytesOut = 0,Server status = ONLINE,Last 7 days,High,BytesIn BytesOut,transfer:ListServers transfer:ListUsers,Delete server if no transfers - Hourly server charge
+Storage Gateway,CloudBytesUploaded = 0,CloudBytesDownloaded = 0,GatewayState = Running,Last 14 days,Medium,CloudBytesUploaded CacheHitPercent,storagegateway:ListGateways,Delete gateway if no data transfers - Hourly gateway cost
+Lightsail,CPUUtilization < 2%,NetworkIn < 100KB/day AND NetworkOut < 100KB/day,Instance State = running,Last 7 days,Medium,CPUUtilization NetworkIn NetworkOut,lightsail:GetInstances,Stop or delete instance if unused - Fixed hourly cost even when idle
+CodeBuild,Builds = 0,BuildMinutes = 0,Projects exist,Last 30 days,Low,Builds SucceededBuilds FailedBuilds Duration,codebuild:ListProjects codebuild:ListBuilds,Delete unused projects - Pay per build minute only
+CodePipeline,PipelineExecutions = 0,No recent deployments,Pipelines exist,Last 30 days,Low,N/A,codepipeline:ListPipelines codepipeline:ListPipelineExecutions,Delete unused pipelines - Per pipeline per month charge
+CodeDeploy,Deployments = 0,DeploymentGroups inactive,Applications exist,Last 30 days,Low,N/A,codedeploy:ListApplications codedeploy:ListDeployments,Delete unused applications - Free for EC2/Lambda but cleanup
+CodeCommit,GitPushes = 0,GitPulls = 0,Repositories exist,Last 30 days,Low,N/A,codecommit:ListRepositories,Delete unused repositories - Pay for storage and requests
+CodeArtifact,PackageDownloads = 0,PackageUploads = 0,Repositories exist,Last 30 days,Low,N/A,codeartifact:ListRepositories,Delete unused repositories - Pay for storage and requests
+ECR,ImagePush = 0,ImagePull = 0,Images stored > 0,Last 30 days,Low,N/A,ecr:DescribeRepositories ecr:ListImages,Delete unused images/repositories - Pay for image storage
+Amplify,BuildMinutes = 0,HostingBandwidth = 0,Apps exist,Last 30 days,Low,N/A,amplify:ListApps,Delete unused apps - Pay for build and hosting
+Cloud9,UserActivity = 0 (CloudTrail),EC2 instance stopped or idle,Environment running = true,Last 14 days,Medium,CPUUtilization (underlying EC2),cloud9:ListEnvironments,Delete environment if unused - Pay for underlying EC2 instance
+X-Ray,TracesIndexed = 0,SegmentsReceived = 0,Tracing configured,Last 30 days,Low,N/A,xray:GetTraceSummaries,Disable tracing if no activity - Pay per trace recorded
+GuardDuty,FindingsGenerated = 0,DataProcessed = minimal,DetectorEnabled = true,Last 90 days,Low,N/A,guardduty:ListDetectors guardduty:ListFindings,Consider disabling if no findings - Per GB data processed cost
+Macie,ClassificationJobs = 0,SensitiveDataFindings = 0,Macie enabled = true,Last 30 days,Low,N/A,macie2:ListClassificationJobs,Disable Macie if no jobs running - Per GB data scanned cost
+Security Hub,FindingsReceived = 0,SecurityScore stagnant,Security Hub enabled = true,Last 30 days,Low,N/A,securityhub:DescribeHub securityhub:GetFindings,Review and disable if not using findings - Per finding ingested cost
+Inspector,Assessments = 0,FindingsGenerated = 0,Inspector enabled = true,Last 30 days,Low,N/A,inspector2:ListFindings,Disable Inspector if not actively reviewing findings - Per instance scanned cost
+Detective,VolumeUsageInBytes = 0 (no data),No investigations run,Detective enabled = true,Last 30 days,Medium,N/A,detective:ListGraphs,Delete graph if unused - Per GB data ingested cost
+WAF,Requests evaluated = 0,WebACL not associated with resources,WebACLExists = true,Last 30 days,Low,AllowedRequests BlockedRequests,wafv2:ListWebACLs,Delete unused WebACL - No cost if not associated but cleanup
+Shield,DDoSDetected events = 0,Resources protected but no attacks,Shield Advanced enabled,Last 90 days,High,DDoSDetected,shield:DescribeSubscription,Review Shield Advanced subscription - High fixed monthly cost
+Firewall Manager,Policies active but no compliance issues,AccountsInScope = 0,Policies exist,Last 30 days,Medium,N/A,fms:ListPolicies fms:GetComplianceDetail,Review unused policies - Per policy per account per month
+Network Firewall,PacketsPassedFirewall = 0,PacketsDropped = 0,FirewallStatus = READY,Last 7 days,High,Packets PassedFirewall DroppedPackets,network-firewall:DescribeFirewall,Delete firewall if no traffic - Hourly endpoint + processing cost
+Certificate Manager,Certificates in ISSUED status but not associated,DaysToExpiry tracked,CertificatesIssued > 0,Last 30 days,Low,DaysToExpiry,acm:ListCertificates acm:DescribeCertificate,Delete unused certificates - Free for ACM but cleanup
+Organizations,N/A,N/A,N/A,N/A,N/A,N/A,organizations:ListAccounts,Free service - no idle cost concern
+Control Tower,N/A,N/A,N/A,N/A,Low,N/A,controltower:ListGuardrails,Review Control Tower setup - Underlying service costs apply
+Service Catalog,ProvisionedProductsActive = 0,No deployments,Products exist,Last 30 days,Low,N/A,servicecatalog:ListProvisionedProducts,Delete unused provisioned products - Underlying resource costs
+License Manager,LicenseConsumed = 0,LicenseUsage = 0,Licenses tracked > 0,Last 30 days,Low,N/A,license-manager:ListLicenses,Review and revoke unused license assignments - License fee waste
+Trusted Advisor,N/A,N/A,N/A,N/A,Low,N/A,support:DescribeTrustedAdvisorChecks,Free tier available - Business/Enterprise support plan required for full checks
+Compute Optimizer,N/A,N/A,N/A,N/A,N/A,N/A,compute-optimizer:GetRecommendationSummaries,Free service - no idle cost concern
+Cost Explorer,N/A,N/A,N/A,N/A,N/A,N/A,ce:GetCostAndUsage,Free service - no idle cost concern
+Budgets,N/A,N/A,N/A,N/A,N/A,N/A,budgets:DescribeBudgets,Free for first 2 budgets - no idle cost concern
+Grafana,Dashboards accessed = 0,ActiveUsers = 0,Workspace active = true,Last 14 days,Medium,N/A,grafana:DescribeWorkspace grafana:ListWorkspaces,Delete workspace if unused - Per active user per month
+Prometheus,Metrics ingested = 0,ActiveMetricSeries = 0,Workspace active = true,Last 14 days,Medium,ActiveSeriesCount IngestedSamplesSum,amp:DescribeWorkspace,Delete workspace if no metrics ingested - Per sample ingested and stored
+DevOps Guru,Insights generated = 0,No anomalies detected,MonitoredResourceGroups > 0,Last 30 days,Low,N/A,devops-guru:ListInsights,Review and disable coverage for unused resources - Per resource analyzed per hour
+Resilience Hub,Assessments = 0,No applications assessed,Applications configured,Last 90 days,Low,N/A,resiliencehub:ListApps,Review unused assessments - Pay per assessment run
+Fault Injection Simulator,Experiments run = 0,No actions executed,Experiment templates exist,Last 90 days,Low,N/A,fis:ListExperiments,Delete unused experiment templates - Pay per action per minute
+Incident Manager,No incidents recorded,Response plans not triggered,Response plans configured,Last 30 days,Low,N/A,ssm-incidents:ListIncidentRecords,Review unused response plans - Pay per incident contact per month
+FinSpace,Datasets queried = 0,Users not accessing data,Environments active = true,Last 30 days,High,N/A,finspace:GetEnvironment,Delete environment if unused - High hourly cost
+HealthLake,FHIRResourcesCreated = 0,QueryExecutions = 0,Data stores active = true,Last 30 days,Medium,N/A,healthlake:ListFHIRDatastores,Delete data store if unused - Per GB stored and per query
+HealthOmics,Workflows run = 0,SequenceStores not accessed,AnnotationStores empty,Last 30 days,Medium,N/A,omics:ListRuns,Delete unused stores and workflows - Storage and compute costs
+HealthImaging,ImageSets stored > 0 but not accessed,GetImageSetMetadata calls = 0,ImageFrames not retrieved,Last 30 days,Low,N/A,medical-imaging:ListImageSets,Apply lifecycle policy or delete unused image sets - Storage cost per GB
+Clean Rooms,Queries run = 0,DataProcessed = 0,Collaborations active = true,Last 30 days,Low,N/A,cleanrooms:ListCollaborations,Delete unused collaborations - Pay per query processed
+Entity Resolution,MatchingWorkflows run = 0,RecordsMatched = 0,Workflows exist,Last 30 days,Low,N/A,entityresolution:ListMatchingWorkflows,Delete unused workflows - Pay per record matched
+Data Exchange,Data sets not accessed,Revisions not imported,ActiveSubscriptions > 0,Last 30 days,Low,N/A,dataexchange:ListDataSets,Review and cancel unused subscriptions - Subscription cost
+Data Firehose,IncomingRecords = 0,DeliveryToS3.Success = 0,DeliveryStreamStatus = ACTIVE,Last 7 days,Medium,DeliveryToS3.Success IncomingRecords IncomingBytes,firehose:DescribeDeliveryStream,Delete unused delivery streams - Pay per GB delivered
+Pinpoint,Messages sent = 0,CampaignsActive = 0,Projects exist,Last 30 days,Low,N/A,pinpoint:GetCampaigns pinpoint:GetApplicationSettings,Delete unused projects - Pay per message sent
+Simple Email Service,Emails sent = 0,Sending quota not used,SES enabled = true,Last 30 days,Low,NumberOfMessagesSent NumberOfMessagesDelivered NumberOfBounces NumberOfComplaints,ses:GetSendStatistics,Review and disable if not sending - Pay per email sent
+Chime,Meetings hosted = 0,AttendeeMinutes = 0,ActiveUsers = 0,Last 30 days,Low,N/A,chime:ListMeetings,Delete unused Chime accounts - Pay per meeting minute
+Connect,Contacts handled = 0,AgentOnlineTime = 0,Instance active = true,Last 14 days,High,ContactsHandled AgentOnlineTime,connect:ListInstances,Delete instance if unused - Hourly instance charge
+WorkDocs,Documents accessed = 0,ActiveUsers = 0,Storage utilized,Last 30 days,Low,N/A,workdocs:DescribeUsers workdocs:DescribeActivities,Delete unused accounts - Pay per user per month
+WorkMail,Emails sent/received = 0,Mailboxes inactive,ActiveMailboxes > 0,Last 30 days,Medium,N/A,workmail:ListOrganizations workmail:ListUsers,Delete unused mailboxes - Per mailbox per month
+GameLift,GameSessions = 0,PlayerSessions = 0,Fleets active = true,Last 7 days,High,ActiveInstances CurrentPlayerSessions ActiveGameSessions,gamelift:DescribeFleetUtilization,Delete idle fleets - High hourly instance cost
+Managed Blockchain,Transactions = 0,Proposals = 0,Network active = true,Last 14 days,High,N/A,managedblockchain:ListNetworks,Delete network if unused - High hourly cost
+Ground Station,Contacts scheduled = 0,DataDelivered = 0,Contacts not completed in time window,Last 90 days,High,N/A,groundstation:ListContacts,Review satellite contact schedule - Pay per contact minute
+IoT Core,Messages published = 0,Rules triggered = 0,Things registered but inactive,Last 14 days,Low,PublishIn.Success RulesExecuted Connect.Success,iot:ListThings,Review and remove inactive things/rules - Pay per message
+IoT Analytics,Messages ingested = 0,Datasets not queried,Channels exist but empty,Last 14 days,Medium,N/A,iotanalytics:ListChannels iotanalytics:ListDatasets,Delete unused channels and datasets - Storage and processing costs
+IoT Greengrass,Deployments not updated,Devices offline,ComponentsDeployed = 0,Last 14 days,Low,N/A,greengrass:ListDeployments greengrass:ListCoreDevices,Review and remove inactive devices - Pay per device per month
+IoT SiteWise,DataPoints ingested = 0,Assets with no measurements,Portals not accessed,Last 14 days,Medium,N/A,iotsitewise:ListAssets,Delete unused assets and portals - Storage and data processing cost
+Lookout for Equipment,Inference executions = 0,Models not predicting,Models active = true,Last 30 days,Medium,N/A,lookoutequipment:ListInferenceExecutions,Delete unused models - Pay per model and inference hour
+Kendra,Queries = 0,Indexes active but not queried,DocumentsIndexed > 0,Last 14 days,High,N/A,kendra:ListIndices,Delete index if unused - High hourly index cost
+Lex,Conversations = 0,Intents not triggered,SessionsActive = 0,Last 30 days,Low,RuntimeUserInputEvents RuntimeIntentEvents,lex:GetBot,Delete unused bots - Pay per request only
+Polly,Characters synthesized = 0,API requests = 0,Polly configured,Last 30 days,Low,N/A,polly:SynthesizeSpeech (API calls),No cost when not invoked - Delete unused lexicons if any
+Transcribe,Audio minutes transcribed = 0,Jobs completed = 0,Transcription service enabled,Last 30 days,Low,N/A,transcribe:ListTranscriptionJobs,No cost when not invoking - Delete unused vocabularies
+Translate,Characters translated = 0,SuccessfulRequests = 0,Translate service enabled,Last 30 days,Low,N/A,translate:TranslateText (API calls),No cost when not invoking - Review and delete custom terminologies
+Comprehend,Text analyzed = 0,DetectOperations = 0,Comprehend enabled,Last 30 days,Low,N/A,comprehend:DetectSentiment (API calls),No cost when not invoked - Delete unused endpoints if any
+Rekognition,Images analyzed = 0,No API calls,Rekognition enabled,Last 30 days,Low,N/A,rekognition:DetectLabels (API calls),No cost when not invoked - Delete unused collections and stream processors
+Textract,Documents analyzed = 0,Pages processed = 0,Textract enabled,Last 30 days,Low,N/A,textract:AnalyzeDocument (API calls),No cost when not invoked - Cleanup
+Forecast,Forecasts generated = 0,Datasets not imported,Forecasts exist but not used,Last 30 days,Low,N/A,forecast:ListForecasts,Delete unused forecasts and datasets - Storage and compute costs
+Personalize,Campaigns deployed but no recommendations,EventsIngested = 0,Campaigns active = true,Last 14 days,High,N/A,personalize:ListCampaigns personalize:GetRecommendations,Delete unused campaigns - Hourly campaign cost
+Fraud Detector,Predictions = 0,Detectors deployed but not invoked,ModelVersions active = true,Last 30 days,Medium,N/A,frauddetector:GetEventPrediction,Delete unused detectors and models - Hourly model cost
+Bedrock,Model invocations = 0,Tokens generated = 0,Provisioned throughput exists,Last 14 days,High,Invocations ModelLatency,bedrock:ListFoundationModels bedrock:InvokeModel,Delete provisioned throughput if unused - Pay per token only for on-demand
+SageMaker,Endpoints invoked = 0 OR Training jobs not running,Invocations = 0,EndpointStatus = InService OR instance running,Last 7 days,High,ModelInvocations ModelLatency CPUUtilization,sagemaker:ListEndpoints sagemaker:ListTrainingJobs,Delete idle endpoints - High hourly instance costs
+Batch,Jobs submitted = 0,ComputeEnvironments active but idle,No jobs in time window,Last 30 days,Medium,N/A,batch:ListJobs batch:DescribeComputeEnvironments,Delete unused compute environments - Underlying EC2 costs when running
+Managed Apache Airflow,DAGs executed = 0,Workers idle,Environment active = true,Last 14 days,High,N/A,mwaa:GetEnvironment,Delete environment if unused - High hourly environment cost
+Managed Apache Flink,Records processed = 0,KPUs utilized = 0,Application running = true,Last 7 days,High,KPUs millisBehindLatest,kinesisanalyticsv2:DescribeApplication,Stop or delete application if unused - KPU hourly cost
+Deadline Cloud,Jobs submitted = 0,Queues active with no workers,No active renders,Last 30 days,Medium,N/A,deadline:ListQueues deadline:ListJobs,Delete unused queues and farms - Pay per compute hour only
+IoT Device Management,Jobs executed = 0,Fleets managed with no activity,DevicesReporting = 0,Last 30 days,Low,N/A,iot:ListThingGroups iot:ListJobs,Review and remove inactive fleet configurations - Pay per operation
+IoT Device Defender,AuditFindings = 0,ViolationsActive = 0,SecurityProfiles exist but not alerting,Last 30 days,Low,Violations,iot:ListAuditFindings iot:ListSecurityProfiles,Disable unused audit and profiles - Pay per audit and violation
+IoT Events,DetectorModels active but no events,InputsReceived = 0,DetectorModelEvaluations = 0,Last 14 days,Low,N/A,iotevents:ListDetectorModels iotevents:ListInputs,Delete unused detector models - Pay per message and evaluation
+IoT FleetWise,Vehicles registered but no data,CampaignsActive = 0,SignalCatalog exists,Last 30 days,Low,N/A,iotfleetwise:ListVehicles iotfleetwise:ListCampaigns,Delete unused campaigns - Pay per vehicle per month
+IoT TwinMaker,Entities queried = 0,SceneComponents not accessed,Workspaces active = true,Last 30 days,Medium,N/A,iottwinmaker:ListWorkspaces iottwinmaker:ListEntities,Delete unused workspaces - Pay per API call and data storage
+Monitron,SensorReadings = 0,AnomaliesDetected = 0,Projects active = true,Last 30 days,Medium,N/A,monitron:ListProjects,Delete unused projects - Pay per sensor per month
+Panorama,Models deployed but no video,VideoStreamsProcessed = 0,Appliances online = true,Last 14 days,High,N/A,panorama:ListApplicationInstances panorama:ListDevices,Undeploy unused applications - Appliance hardware cost
+Comprehend Medical,API calls = 0,InferenceUnits = 0,Endpoints deployed but idle,Last 30 days,Low,N/A,comprehendmedical:DetectEntitiesV2 (API calls),No cost when not invoked - Delete unused endpoints if any
+Augmented AI,HumanLoops = 0,TasksCompleted = 0,WorkforceActive = true,Last 30 days,Low,N/A,sagemaker-a2i-runtime:ListHumanLoops,Delete unused flow definitions - Pay per human review task
+Bedrock AgentCore,AgentInvocations = 0,Tools not executed,Agents exist but not invoked,Last 14 days,Medium,Invocations AgentLatency,bedrock-agent-runtime:InvokeAgent bedrock-agent:ListAgents,Delete unused agents and knowledge bases - Storage and API costs
+Q Business,Conversations = 0,DocumentsIndexed but no queries,ActiveUsers = 0,Last 30 days,High,N/A,qbusiness:ListApplications qbusiness:GetApplication,Delete application if unused - High monthly per-user cost
+Q Developer,CodeSuggestions accepted = 0,ActiveUsers = 0,Subscription active = true,Last 30 days,Medium,N/A,codewhisperer:GenerateRecommendations (API calls),Cancel subscription if unused - Per user per month cost
+Nova Act,AgentRuns = 0,TasksCompleted = 0,Agent configured,Last 30 days,Low,N/A,nova:ListAgentRuns (API calls),No cost when not running tasks - Review and delete unused configurations
+Amazon Q,Queries = 0,ActiveUsers = 0,SubscriptionActive = true,Last 30 days,Medium,N/A,q:ListSubscriptions (API calls),Cancel subscription if unused - Per user per month cost
+DevOps Agent,AgentInvocations = 0,TasksCompleted = 0,Agent configured,Last 30 days,Low,N/A,codepipeline:ListPipelines (via agent),Review and disable if unused - Pay per invocation only
+Service Quotas,N/A,N/A,N/A,N/A,N/A,N/A,servicequotas:ListServiceQuotas,Free service - no idle cost concern
+Resource Access Manager,ResourceSharesActive = 0,No resources shared,ResourceShares exist,Last 30 days,Low,N/A,ram:ListResourceShares ram:ListResources,Delete unused resource shares - Free service but cleanup
+Resource Explorer,N/A,N/A,N/A,N/A,N/A,N/A,resource-explorer-2:ListIndexes,Free service - no idle cost concern
+Infrastructure Composer,N/A,N/A,N/A,N/A,N/A,N/A,cloudformation:ListStacks,Free design tool - no idle cost concern
+Serverless Application Repository,ApplicationsDeployed = 0,No deployments in time window,Applications published = true,Last 90 days,Low,N/A,serverlessrepo:ListApplications,Review and remove unused published applications - Underlying resource costs
+Proton,EnvironmentsDeployed = 0,ServiceInstancesActive = 0,Environments exist,Last 30 days,Medium,N/A,proton:ListEnvironments proton:ListServiceInstances,Delete unused environments - Underlying resource costs
+Data Transfer Terminal,TransfersInitiated = 0,DataTransferred = 0,Terminal exists,Last 30 days,Low,N/A,dtt:ListJobs (API calls),Review unused terminal - Pay per use only
+Supply Chain,Forecasts generated = 0,DataSynced = stale,Instances active = true,Last 30 days,Medium,N/A,scn:ListInstances (API calls),Delete instance if unused - Hourly instance cost
+Partner Central,Opportunities active = 0,No active collaborations,Partner account exists,Last 30 days,Low,N/A,partnercentral-selling:ListOpportunities (API calls),Free service for partners - no idle cost concern
+Payment Cryptography,KeysActive but no operations,CryptographicOperations = 0,Keys exist,Last 30 days,Medium,N/A,payment-cryptography:ListKeys,Delete unused keys - Pay per key per month
+Verified Permissions,AuthorizationRequests = 0,PoliciesActive but not queried,PolicyStoresActive = true,Last 30 days,Low,N/A,verifiedpermissions:ListPolicyStores,Review and delete unused policy stores - Pay per authorization request
+User Notifications,N/A,N/A,N/A,N/A,N/A,N/A,notifications:ListNotificationHubs,Free service - no idle cost concern
+End User Messaging,MessagesSent = 0,PhoneNumbers active but unused,PhoneNumbersActive > 0,Last 30 days,Medium,N/A,sms-voice:DescribePhoneNumbers (API calls),Release unused phone numbers - Monthly phone number fee
+Chime SDK,MediaSessions = 0,Attendees = 0,MessagingAPIRequests = 0,Last 30 days,Low,N/A,chime:ListMeetings chime-sdk-messaging:ListChannels,Review and delete unused Chime SDK resources - Pay per session minute
+WorkSpaces Applications,AppInstances = 0,UsersAccessing = 0,Applications deployed = true,Last 30 days,Medium,N/A,workspaces-web:ListPortals appstream:DescribeApplications,Delete unused app instances - Pay per user per hour
+WorkSpaces Secure Browser,BrowserSessions = 0,ActiveUsers = 0,PortalsActive = true,Last 14 days,Medium,N/A,workspaces-web:ListPortals workspaces-web:ListUserSettings,Delete portal if unused - Pay per user-hour
+WorkSpaces Thin Client,DevicesActive = 0,DevicesRegistered but inactive,SoftwareSetActive = true,Last 14 days,Medium,N/A,thinclient:ListDevices thinclient:ListEnvironments,Review inactive devices - Pay per device per month
+Red Hat OpenShift Service on AWS,NodeCPUUtilization < 5%,APIServerRequests = 0,ClustersRunning = true,Last 7 days,High,CPUUtilization MemoryUtilization,rosa:ListClusters,Delete cluster if unused - Very high hourly control plane + node cost
+Elastic VMware Service,VMCPUUtilization < 5%,VMsRunning but idle,ClusterState = DEPLOYED,Last 7 days,High,CPUUtilization MemoryUtilization,evs:DescribeVclusters (API calls),Delete cluster if unused - Very high dedicated host cost
+Oracle Database@AWS,ConnectionsActive = 0,DatabaseStatus = AVAILABLE but no queries,Databases exist,Last 7 days,High,DatabaseConnections CPUUtilization,odb:ListDbServers (API calls),Delete database instances if unused - High hourly Oracle license + compute cost
+Outposts,InstancesRunning = 0 (on Outpost),ConnectivityStatus = connected but no workloads,Outpost exists,Last 14 days,High,CPUUtilization MemoryUtilization (on EC2 instances),outposts:ListOutposts ec2:DescribeInstances,Repatriate workloads - Outpost has fixed monthly capacity cost regardless of use
+One Enterprise,N/A,N/A,N/A,N/A,N/A,N/A,license-manager:ListReceivedLicenses,Review enterprise license bundle - Fixed subscription cost
+Wickr,ActiveUsers = 0,MessagesSent = 0,NetworksOnline = true,Last 30 days,Medium,N/A,wickr:GetNetwork (API calls),Delete unused networks - Pay per user per month
+SimSpace Weaver,SimulationsRunning = 0,No compute consumed,Simulation exists,Last 30 days,High,N/A,simspaceweaver:ListSimulations,Delete unused simulations - Pay per compute hour
+Parallel Computing Service,ClustersActive but no jobs,JobsSubmitted = 0,ComputeNodes running,Last 14 days,High,CPUUtilization MemoryUtilization,pcs:ListClusters pcs:ListJobs,Terminate idle clusters - Pay for compute nodes when running
+Telco Network Builder,NetworkInstances active but no traffic,NetworkServicesActive = 0,Network instances exist,Last 30 days,Medium,N/A,tnb:ListSolNetworkInstances tnb:ListSolFunctionPackages,Terminate unused network instances - Compute and networking costs
+Braket,TasksExecuted = 0,ShotsUsed = 0,Notebooks running,Last 30 days,Medium,N/A,braket:GetQuantumTask braket:SearchQuantumTasks,Delete unused notebooks and tasks - Pay per task and shot
+Signer,SigningJobsCompleted = 0,SigningProfilesActive but unused,Profiles exist,Last 30 days,Low,N/A,signer:ListSigningJobs signer:ListSigningProfiles,Revoke unused signing profiles - Pay per signing job
+Artifact,N/A,N/A,N/A,N/A,N/A,N/A,artifact:GetReport artifact:ListAgreements,Free service - compliance reports only
+Audit Manager,AssessmentsActive = 0,EvidenceCollected = 0,Frameworks configured,Last 30 days,Low,N/A,auditmanager:ListAssessments auditmanager:GetAccountStatus,Delete unused assessments - Pay per assessment and evidence
+Billing Conductor,BillingGroupsActive but not generating reports,PricingRulesApplied = 0,Billing groups exist,Last 30 days,Low,N/A,billingconductor:ListBillingGroups billingconductor:ListPricingRules,Review unused billing groups - Pay per linked account per month
+B2B Data Interchange,TransactionsProcessed = 0,PartnershipsActive but no activity,Trading partners configured,Last 30 days,Low,N/A,b2bi:ListPartnerships b2bi:ListTransformers,Delete unused partnerships - Pay per GB processed
+Auto Scaling,N/A,N/A,N/A,N/A,N/A,N/A,autoscaling:DescribeAutoScalingGroups,Free service - pay for underlying EC2 instances only
+SWF,WorkflowExecutionsOpen = 0,ActivityTasksCompleted = 0,Domains exist,Last 30 days,Low,N/A,swf:ListOpenWorkflowExecutions swf:ListDomains,Delete unused workflows - Pay per workflow execution and task
+CloudShell,N/A,N/A,N/A,N/A,N/A,N/A,cloudshell:GetEnvironmentStatus (API calls),Free service - no idle cost concern
+CloudSearch,SearchRequests = 0,IndexDocuments not updated,SearchDomainState = Active,Last 14 days,Medium,Searching Indexing,cloudsearch:DescribeDomains,Delete domain if unused - Hourly instance cost
+CloudHSM,HSMs active but no crypto operations,CryptoOperations = 0,ClustersActive = true,Last 7 days,High,N/A,cloudhsmv2:DescribeClusters cloudhsmv2:DescribeHsms,Delete HSM cluster if unused - Very high hourly dedicated HSM cost
+Cloud Map,ServicesRegistered but no queries,DiscoveryQueriesAPI = 0,Instances registered = true,Last 30 days,Low,N/A,servicediscovery:ListServices servicediscovery:ListInstances,Delete unused services and namespaces - Pay per query
+Directory Service,DomainControllerStatus = Active but no authentications,UserAuthentications = 0,DirectoriesActive = true,Last 14 days,High,N/A,ds:DescribeDirectories ds:DescribeDomainControllers,Delete directory if unused - High hourly per directory cost
+Elastic Transcoder,JobsCompleted = 0,PipelinesActive but no jobs,Pipelines exist,Last 30 days,Low,N/A,elastictranscoder:ListPipelines elastictranscoder:ListJobsByStatus,Delete unused pipelines - Pay per output minute only
+Elastic Disaster Recovery,SourceServersReplicating = 0,LagDuration growing (replication stopped),Servers configured,Last 7 days,Medium,LagDuration BackloggedStorageBytes,drs:DescribeSourceServers drs:DescribeJobs,Remove disconnected source servers - Pay per replicated server per hour
+Identity Center,N/A,N/A,N/A,N/A,N/A,N/A,sso:ListInstances sso-admin:ListAccountAssignments,Free service - no idle cost concern
+Global Accelerator,NewFlowCount = 0,HealthyEndpointCount = 0,Accelerators active = true,Last 7 days,High,NewFlowCount ProcessedBytesOut HealthyEndpointCount,globalaccelerator:ListAccelerators,Delete accelerator if no traffic - Fixed hourly + data transfer cost
+Global View,N/A,N/A,N/A,N/A,N/A,N/A,resource-explorer-2:Search,Free service - no idle cost concern
+Recycle Bin,N/A,N/A,N/A,N/A,N/A,N/A,rbin:ListRules rbin:ListResourcesByRuleId,Free service - snapshot/AMI retention management only
+RTB Fabric,SeatbidRequests = 0,BidResponses = 0,Service configured,Last 14 days,High,N/A,elabd:DescribeInstances (API calls),Review and suspend if no bidding activity - Hourly infrastructure cost
+CodeCatalyst,WorkflowRunsCompleted = 0,ProjectsActive but no activity,Projects exist,Last 30 days,Low,N/A,codecatalyst:ListProjects codecatalyst:ListWorkflowRuns,Delete unused projects - Pay per active user and compute minute
+Console Home,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Console UI - no idle cost concern
+Security Agent,AgentsOnline = 0,FindingsReported = 0,Agents deployed,Last 14 days,Low,N/A,ssm:DescribeInstanceInformation,Deactivate unused agents - Pay per monitored instance
+Security Hub CSPM,FindingsActive = 0,StandardsEnabled but no new findings,Security Hub enabled = true,Last 30 days,Low,N/A,securityhub:DescribeHub securityhub:GetFindingAggregator,Review and disable if not using findings - Per finding ingested cost
+Security Incident Response,IncidentsActive = 0,CasesOpened = 0,Subscription active,Last 30 days,High,N/A,security-ir:ListCases (API calls),Review subscription if not using active incident response - Subscription cost
+Security Lake,DataIngested = 0,LogSources enabled but no data,DataLakeActive = true,Last 14 days,Medium,N/A,securitylake:ListDataLakes securitylake:ListLogSources,Disable unused log sources - Pay per GB ingested and stored
+Private Certificate Authority,CAsActive but no certs issued,CertificatesIssued = 0,CAStatus = ACTIVE,Last 30 days,High,N/A,acm-pca:ListCertificateAuthorities acm-pca:ListCertificates,Delete CA if unused - High monthly per-CA cost
+S3 Glacier,ArchivesStored but no retrievals,RetrievalJobsCompleted = 0,Vaults exist,Last 90 days,Low,N/A,glacier:ListVaults glacier:ListJobs,Apply expiration policy or delete empty vaults - Very low storage cost but cleanup
+MQ,MessageCount = 0,ConnectionCount = 0,BrokersActive = true,Last 7 days,High,MessageCount ConnectionCount CpuUtilization,mq:ListBrokers mq:DescribeBroker,Delete broker if unused - High hourly broker cost
+Aurora DSQL,DatabaseConnections = 0,QueriesPerSecond = 0,Clusters active = true,Last 7 days,Medium,DatabaseConnections QueriesPerSecond,dsql:ListClusters (API calls),Delete cluster if unused - Pay per compute unit when active
+Activate,N/A,N/A,N/A,N/A,N/A,N/A,N/A,AWS startup program - no idle cost concern
+App Mesh,TrafficRate = 0 (no requests),VirtualNodesActive but no traffic,Mesh resources exist,Last 14 days,Medium,N/A,appmesh:ListMeshes appmesh:ListVirtualNodes,Delete unused mesh and virtual nodes - Pay per vCPU hour of connected proxies
+App Runner,RequestCount = 0,ActiveInstances = 0,ServiceStatus = RUNNING,Last 7 days,High,RequestCount Latency ActiveInstances,apprunner:ListServices apprunner:DescribeService,Pause or delete service if unused - Hourly compute cost even with no requests
+App Studio,ActiveUsers = 0,ActionExecutions = 0,Applications deployed = true,Last 30 days,Low,N/A,appstudio:ListApplications (API calls),Delete unused applications - Pay per active user
+AppConfig,DeploymentsCompleted = 0,ConfigurationProfilesActive but not deployed,Environments exist,Last 30 days,Low,N/A,appconfig:ListApplications appconfig:ListDeployments,Delete unused configurations - Free service but cleanup
+AppFabric,NormalizedEventsProcessed = 0,AppConnections active but no events,Ingestion active = true,Last 14 days,Medium,N/A,appfabric:ListAppBundles appfabric:ListIngestions,Delete unused ingestions - Pay per event processed
+AppSync,GraphQLRequestsCount = 0,ConnectedClients = 0,GraphQL APIs exist,Last 14 days,Low,N/A,appsync:ListGraphqlApis appsync:ListApiKeys,Delete unused APIs - Pay per request and real-time updates
+Application Discovery Service,AgentsRunning = 0,ServersDiscovered but no updates,Agents deployed,Last 30 days,Low,N/A,discovery:DescribeAgents discovery:DescribeServers,Remove inactive agents - Free discovery tool but cleanup
+Application Migration Service,SourceServersReplicating = 0,LagDuration growing,Replication servers running,Last 14 days,Medium,N/A,mgn:DescribeSourceServers mgn:DescribeJobs,Decommission after migration - Pay for launched test/cutover instances
+Billing,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Free billing console - no idle cost concern
+CloudWatch Evidently,ExperimentEvaluations = 0,FeaturesActive but not evaluated,Experiments exist,Last 30 days,Low,N/A,evidently:ListExperiments evidently:ListFeatures,Delete unused experiments - Pay per evaluation and event
+CloudWatch Logs,IncomingBytes = 0,IncomingLogEvents = 0,LogGroupsActive = true,Last 14 days,Low,IncomingBytes IncomingLogEvents,logs:DescribeLogGroups logs:DescribeLogStreams,Delete unused log groups or set retention policy - Storage cost per GB
+CloudWatch Logs Insights,QueriesExecuted = 0,BytesScanned = 0,Log groups exist,Last 30 days,Low,N/A,logs:StartQuery logs:GetQueryResults,No cost when not querying - Delete unused log groups
+CloudWatch RUM,EventsReceived = 0,SessionsRecorded = 0,App monitors exist,Last 14 days,Low,N/A,rum:ListAppMonitors rum:GetAppMonitor,Delete unused app monitors - Pay per event recorded
+CloudWatch Synthetics,CanaryRunsCompleted = 0,CanaryRunsStopped,Canaries configured = true,Last 14 days,Low,N/A,synthetics:DescribeCanaries synthetics:GetCanaryRuns,Stop or delete unused canaries - Pay per canary run
+Cost and Usage Reports,N/A,N/A,N/A,N/A,N/A,N/A,cur:DescribeReportDefinitions,Free CUR reporting - no idle cost concern
+DataZone,DataAssetsPublished = 0,ProjectsActive but no queries,Domain active = true,Last 30 days,Medium,N/A,datazone:ListDomains datazone:ListProjects,Delete unused domains - Pay per asset and API calls
+Database Migration Service,ReplicationInstancesRunning but no tasks,TasksRunning = 0,Replication instances exist,Last 14 days,High,N/A,dms:DescribeReplicationInstances dms:DescribeReplicationTasks,Delete replication instances after migration - Hourly instance cost
+Elemental Appliances & Software,N/A,N/A,N/A,N/A,N/A,N/A,N/A,On-premises hardware - no AWS idle cost concern
+Elemental MediaConnect,OutputBandwidth = 0,FlowsActive but no traffic,FlowStatus = ACTIVE,Last 7 days,High,N/A,mediaconnect:ListFlows mediaconnect:DescribeFlow,Delete flows if no video transport - Hourly per flow cost
+Elemental MediaConvert,JobsCompleted = 0,No transcoding activity,Queues exist,Last 30 days,Low,N/A,mediaconvert:ListJobs mediaconvert:DescribeEndpoints,Delete unused queues - Pay per output minute only
+Elemental MediaLive,InputBitrateActive = 0,ChannelsRunning but no input,ChannelState = RUNNING,Last 7 days,High,ActiveConnections InputVideoFrameRate,medialive:ListChannels medialive:DescribeChannel,Stop or delete idle channels - Very high hourly cost per channel
+Elemental MediaPackage,EgressRequestCount = 0,EndpointsServing = 0,Channels exist,Last 14 days,Medium,EgressBytes,mediapackage:ListChannels mediapackage:ListOriginEndpoints,Delete unused channels - Pay per GB egress
+Elemental MediaStore,ObjectsStored = 0,GetRequestsCount = 0,Containers exist,Last 30 days,Low,N/A,mediastore:ListContainers mediastore:DescribeContainer,Delete empty containers - Pay per GB stored and per request
+Elemental MediaTailor,SessionInitializationRequests = 0,AdInsertions = 0,Configurations exist,Last 30 days,Low,N/A,mediatailor:ListPlaybackConfigurations,Delete unused configurations - Pay per session only
+Glue DataBrew,JobRunsCompleted = 0,DatasetsConnected but not used,Projects exist,Last 30 days,Low,N/A,databrew:ListJobs databrew:ListProjects,Delete unused projects - Pay per node-hour only
+Health Dashboard,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Free service - no idle cost concern
+IQ,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Marketplace service - no idle cost concern
+Interactive Video Service,ConcurrentViewers = 0,IngestBitrateActive = 0,Channels active = true,Last 14 days,Medium,IngestFrameRate LiveDecodedFrames,ivs:ListChannels ivs:GetChannel,Stop or delete idle channels - Hourly channel cost
+Kinesis Video Streams,PutMediaRequests = 0,GetMediaRequests = 0,Streams active = true,Last 14 days,Medium,PutLatency GetMediaMillisBehindNow IncomingBytes,kinesisvideo:ListStreams kinesisvideo:DescribeStream,Delete unused streams - Pay per GB ingested and stored
+Lake Formation,N/A,N/A,N/A,N/A,N/A,N/A,lakeformation:ListLakeFormationOptins glue:GetTables,Free governance layer - pay for underlying Glue and S3 resources
+Launch Wizard,N/A,N/A,N/A,N/A,N/A,N/A,launchwizard:ListDeployments,Free wizard - no idle cost concern
+Mainframe Modernization,CPUUtilization < 5%,ApplicationsDeployed but not serving requests,EnvironmentsRunning = true,Last 7 days,High,CPUUtilization MemoryUtilization,m2:ListEnvironments m2:ListApplications,Stop environment if unused - High hourly vCPU cost
+Marketplace,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Portal - no idle cost concern
+Parameter Store,ParametersAccessed = 0,GetParameterAPIRequests = 0,Advanced parameters exist,Last 30 days,Low,N/A,ssm:DescribeParameters ssm:GetParameterHistory,Downgrade advanced parameters to standard or delete if unused - Advanced tier per parameter per month
+Personal Health Dashboard,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Free dashboard - no idle cost concern
+Resource Groups,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Free grouping tool - no idle cost concern
+Snow Family,DeviceStatus = RETURNED OR no active jobs,DataTransferredGB = 0,Jobs exist,Last 90 days,High,N/A,snowball:ListJobs snowball:DescribeJob,Return device promptly after use - Pay per device-day
+Support,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Support plan - fixed monthly fee
+Tag Editor,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Free tagging tool - no idle cost concern
+Well-Architected Tool,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Free architectural review tool - no idle cost concern
+re:Post,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Community forum - no idle cost concern

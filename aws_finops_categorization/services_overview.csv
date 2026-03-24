@@ -1,0 +1,243 @@
+Service Name,Category Type,Active Criteria,Idle Criteria,Underutilized Criteria,Archived Criteria,Primary Metrics Source,Notes
+EC2,Compute,CPUUtilization > 10% OR NetworkIn/Out > 1MB/day,CPUUtilization < 2% AND NetworkIn/Out < 100KB/day for 7+ days,CPUUtilization 2-10% OR consistent low network activity,N/A - Use snapshots/AMIs for archival,CloudWatch Metrics,Consider instance family and workload type
+RDS,Database,DatabaseConnections > 0 OR ReadIOPS/WriteIOPS > 0,DatabaseConnections = 0 for 7+ days AND IOPS < 10,Low connection count (< 5) OR IOPS < 20% of provisioned,Automated snapshots older than retention policy,CloudWatch + RDS API,Check for read replicas
+DynamoDB,Database,ConsumedReadCapacityUnits > 0 OR ConsumedWriteCapacityUnits > 0,Zero consumed capacity for 7+ days,Consumed capacity < 10% of provisioned (for provisioned mode),N/A - Use backups for archival,CloudWatch Metrics,On-demand vs provisioned billing
+S3,Storage,Requests > 100/day (GET/PUT/POST),No access logs for 90+ days,AccessFrequency < monthly OR wrong storage class,Glacier/Deep Archive storage class OR versioned objects,S3 Analytics + CloudWatch,Use S3 Intelligent-Tiering
+Lambda,Compute,Invocations > 0 in last 7 days,Zero invocations for 30+ days,High duration with low memory usage OR errors > 10%,N/A - Delete unused functions,CloudWatch Metrics,Check concurrent executions
+EBS,Storage,VolumeReadOps > 0 OR VolumeWriteOps > 0,Zero read/write ops for 7+ days AND not attached,Low IOPS utilization compared to provisioned,Snapshots older than 90 days,CloudWatch Metrics,Unattached volumes are idle
+ElastiCache,Database,CPUUtilization > 10% OR CacheHits > 0,CPUUtilization < 5% AND CacheHitRate = 0 for 7+ days,CacheHitRate < 50% OR CPUUtilization 5-10%,N/A - Use snapshots for recovery,CloudWatch Metrics,Redis vs Memcached differences
+ECS,Container,RunningTasksCount > 0,RunningTasksCount = 0 for 7+ days,CPUUtilization < 20% on running tasks,N/A - Task definitions retained,CloudWatch + ECS API,Check Fargate vs EC2 launch type
+EKS,Container,Node count > 0 AND pod count > 0,No pods running for 7+ days,Node utilization < 30% OR pods not scheduled,N/A - Clusters should be deleted,CloudWatch + Kubernetes API,Check node groups separately
+Redshift,Data Warehouse,DatabaseConnections > 0 OR QueriesCompletedPerSecond > 0,No connections for 7+ days,CPUUtilization < 20% AND low query volume,Snapshots for compliance/recovery,CloudWatch + Redshift API,Expensive when idle
+CloudFront,Networking,Requests > 1000/day,Requests < 10/day for 30+ days,Low request volume but high data transfer costs,N/A - Distributions can be disabled,CloudWatch Metrics,Check cache hit ratio
+API Gateway,Networking,Count > 100/day,Zero API calls for 30+ days,Low call volume with high allocated resources,N/A - APIs can be deleted,CloudWatch Metrics + API Gateway API,REST vs HTTP vs WebSocket
+VPC,Networking,Attached resources (EC2 NAT IGW) exist,No attached resources for 30+ days,Default VPC with minimal usage,N/A - VPCs persist,VPC API,Check for unused subnets
+NAT Gateway,Networking,BytesOutToDestination > 1GB/day,BytesOut < 100MB/day for 7+ days,Low data transfer but high hourly cost,N/A - Use NAT instances or remove,CloudWatch Metrics,High cost when underutilized
+Elastic Load Balancer,Networking,ActiveConnectionCount > 0 OR RequestCount > 100/day,Zero connections/requests for 7+ days,Low request count (< 100/day) for ALB/NLB,N/A - Delete unused LBs,CloudWatch Metrics,ALB vs NLB vs CLB pricing
+Route 53,Networking,QueryCount > 1000/day,QueryCount < 10/day for hosted zone,Hosted zones with no records or deleted domains,N/A - Hosted zones persist,CloudWatch Metrics,Check for unused hosted zones
+CloudWatch,Monitoring,Metrics ingested OR alarms configured,No metrics ingested for 30+ days,Custom metrics with no alarms,N/A - Logs can be archived to S3,CloudWatch API,Log retention costs
+CloudTrail,Security,EventCount > 0 (trails active),Trail disabled or no events for 30+ days,Single-region trail when multi-region needed,Logs archived to S3 Glacier,CloudWatch + CloudTrail API,Data events are expensive
+IAM,Security,Users/Roles with recent activity (< 90 days),Users with no activity for 90+ days,Overly permissive policies,N/A - IAM is free,IAM Access Analyzer + CloudTrail,Credential reports for analysis
+KMS,Security,Decrypt/Encrypt operations > 0,No operations for 90+ days,Low usage with customer-managed keys,N/A - Keys can be disabled,CloudWatch Metrics,Key rotation policies
+Secrets Manager,Security,SecretVersions accessed in last 30 days,No access for 90+ days,Secrets with no rotation,N/A - Delete unused secrets,CloudWatch + Secrets Manager API,Rotation configuration
+SNS,Messaging,NumberOfMessagesPublished > 0,Zero messages for 30+ days,Low message volume,N/A - Topics can be deleted,CloudWatch Metrics,Check subscriptions
+SQS,Messaging,NumberOfMessagesSent > 0 OR ApproximateNumberOfMessagesVisible > 0,Zero messages sent/received for 30+ days,Messages in DLQ or high age,N/A - Queues can be deleted,CloudWatch Metrics,FIFO vs Standard
+Kinesis,Streaming,IncomingRecords > 0 OR GetRecords.Success > 0,Zero records for 7+ days,Shard utilization < 20%,Data retention for compliance,CloudWatch Metrics,Shard-level metrics
+Athena,Analytics,DataScannedInBytes > 0 (queries run),No queries for 30+ days,N/A - Pay per query,N/A - Results in S3,CloudWatch + Athena API,Query results retention
+Glue,Analytics,DPU hours > 0 (jobs/crawlers run),No job runs for 30+ days,Job failures > 20% OR long runtimes,N/A - Delete unused jobs/crawlers,CloudWatch + Glue API,Development endpoints cost
+EMR,Analytics,Cluster running with active steps,Cluster running with no steps for 24+ hours,Cluster utilization < 30%,N/A - Terminate clusters,CloudWatch + EMR API,Spot vs on-demand instances
+SageMaker,Machine Learning,Endpoint invocations > 0 OR training jobs running,Endpoint with zero invocations for 7+ days,Low invocation rate for expensive instance,Model artifacts in S3,CloudWatch + SageMaker API,Notebook instances are expensive
+Step Functions,Orchestration,ExecutionsStarted > 0,No executions for 30+ days,High execution failures,N/A - State machines persist,CloudWatch Metrics,Standard vs Express workflows
+EFS,Storage,ClientConnections > 0 OR DataReadIOBytes > 0,No connections/IO for 30+ days,Low throughput mode usage,Infrequent Access storage class,CloudWatch Metrics,Provisioned vs Bursting throughput
+FSx,Storage,DataReadBytes > 0 OR DataWriteBytes > 0,Zero read/write for 7+ days,Low throughput usage,Backups for compliance,CloudWatch Metrics,Windows vs Lustre vs ONTAP
+Backup,Management,BackupJobs completed,No backup jobs for 90+ days,N/A - Backup service,Recovery points in cold storage,CloudWatch + Backup API,Backup vault lock
+CloudFormation,Management,Stacks in CREATE_COMPLETE or UPDATE_COMPLETE,Stacks in failed state for 30+ days,N/A - Infrastructure as Code,N/A - Templates in S3,CloudFormation API,Drift detection
+Config,Management,ConfigurationRecorders active,Recorder stopped for 30+ days,N/A - Compliance tracking,Historical configurations in S3,CloudWatch + Config API,Delivery channel costs
+Systems Manager,Management,CommandInvocations > 0 OR Sessions started,No activity for 30+ days,N/A - Management service,Parameter history,CloudWatch + SSM API,Parameter Store is free tier
+WorkSpaces,End User Computing,WorkSpace in AVAILABLE state with connections,No connections for 7+ days,AlwaysOn with < 4 hours/day usage,N/A - Terminate WorkSpaces,CloudWatch + WorkSpaces API,AutoStop vs AlwaysOn billing
+AppStream,End User Computing,Fleet running with active sessions,Fleet running with no sessions for 24+ hours,Fleet capacity > session demand,N/A - Stop fleets,CloudWatch Metrics,Always-On vs On-Demand
+Direct Connect,Networking,Virtual interfaces configured and active,Virtual interfaces down for 7+ days,Low data transfer for dedicated connection,N/A - Connections persist,CloudWatch Metrics,Dedicated vs Hosted connections
+VPN,Networking,TunnelState = UP with data transfer,Both tunnels DOWN for 7+ days,Low data transfer volume,N/A - Delete unused connections,CloudWatch Metrics,Site-to-Site VPN costs
+Transit Gateway,Networking,BytesIn/BytesOut > 1GB/day,Attachments with no data transfer for 7+ days,Attachments with minimal traffic,N/A - Attachments persist,CloudWatch Metrics,Per-attachment hourly cost
+DocumentDB,Database,DatabaseConnections > 0,No connections for 7+ days,Low connection count and IOPS,Snapshots for recovery,CloudWatch Metrics,MongoDB compatibility
+Neptune,Database,Queries > 0 (GremlinRequestsPerSec or SparqlRequestsPerSec),No queries for 7+ days,Low query volume,Snapshots for recovery,CloudWatch Metrics,Graph database
+Timestream,Database,SuccessfulRequestLatency indicates queries,No queries for 30+ days,Low ingestion rate,N/A - Data retention policies,CloudWatch Metrics,Time series database
+QLDB,Database,JournalStorage > 0 with active sessions,No sessions for 30+ days,Low transaction rate,Exported to S3,CloudWatch Metrics,Immutable ledger
+Keyspaces,Database,ReadCapacityUnits > 0 OR WriteCapacityUnits > 0,Zero consumed capacity for 7+ days,Low utilization of provisioned capacity,N/A - Use backups,CloudWatch Metrics,Cassandra compatibility
+MemoryDB,Database,CPUUtilization > 10% OR Commands > 0,No commands for 7+ days,Low cache utilization,Snapshots for recovery,CloudWatch Metrics,Redis compatible
+OpenSearch,Analytics,SearchRate > 0 OR IndexingRate > 0,Zero search/index operations for 7+ days,Cluster size >> data size,Snapshots to S3,CloudWatch + OpenSearch API,Elasticsearch compatibility
+MSK,Streaming,BytesInPerSec > 0 OR BytesOutPerSec > 0,No data transfer for 7+ days,Broker utilization < 30%,N/A - Delete clusters,CloudWatch Metrics,Kafka managed service
+EventBridge,Event Management,Invocations > 0,No rule invocations for 30+ days,Rules with no targets,N/A - Rules can be disabled,CloudWatch Metrics,Custom vs AWS events
+AppFlow,Integration,FlowExecutions > 0,No flow executions for 30+ days,N/A - Pay per flow run,N/A - Flow definitions persist,CloudFlow Metrics,SaaS integration service
+DataSync,Migration,BytesTransferred > 0 (tasks run),No task executions for 30+ days,N/A - Pay per transfer,N/A - Task definitions persist,CloudWatch Metrics,Data transfer service
+Transfer Family,File Transfer,BytesTransferred > 0,No connections for 7+ days,Low transfer volume for hourly cost,N/A - Disable servers,CloudWatch + Transfer API,SFTP/FTPS/FTP service
+Storage Gateway,Hybrid,BytesUploaded > 0,No data transfer for 7+ days,Low throughput usage,Archived data in Glacier,CloudWatch Metrics,File/Volume/Tape gateway
+Lightsail,Compute,Instance running with NetworkIn/Out > 0,Instance stopped or no network for 7+ days,Low utilization for fixed pricing tier,Snapshots in Lightsail,CloudWatch (limited),Fixed monthly pricing
+CodeBuild,CI/CD,Builds > 0,No builds for 30+ days,N/A - Pay per build minute,N/A - Project definitions persist,CloudWatch Metrics,Compute type impacts cost
+CodePipeline,CI/CD,PipelineExecutions > 0,No executions for 30+ days,Pipeline failures > 20%,N/A - Pipelines persist,CloudWatch Metrics,Per-pipeline monthly cost
+CodeDeploy,CI/CD,Deployments > 0,No deployments for 30+ days,High deployment failure rate,N/A - Deployment groups persist,CloudWatch + CodeDeploy API,Free for EC2/Lambda/ECS
+CodeCommit,Development,Git operations (push/pull) > 0,No Git operations for 90+ days,N/A - Repository service,N/A - Repos can be deleted,CloudWatch Metrics,Pay for storage and requests
+CodeArtifact,Development,Requests > 0 (package downloads),No requests for 30+ days,N/A - Artifact repository,N/A - Repositories persist,CloudWatch Metrics,Maven/npm/PyPI support
+ECR,Container,ImagePush/ImagePull > 0,No image operations for 90+ days,Many old image versions,Images not pulled in 180+ days,CloudWatch Metrics,Image scanning costs
+Amplify,Development,Build minutes > 0 OR hosting bandwidth > 0,No builds or traffic for 30+ days,Low traffic volume,N/A - Apps can be deleted,CloudWatch Metrics,Build minutes + hosting
+Cloud9,Development,Environment running with user activity,Environment running with no activity for 7+ days,N/A - Pay for underlying EC2,N/A - Environments persist,CloudWatch (EC2),Web-based IDE
+X-Ray,Observability,TracesRecorded > 0,No traces for 30+ days,Low sampling rate with high costs,N/A - Traces have retention,CloudWatch Metrics,Distributed tracing
+CloudWatch Logs,Logging,IncomingBytes > 0,No log ingestion for 30+ days,High retention with no queries,Logs exported to S3 Glacier,CloudWatch Metrics,Retention period impacts cost
+CloudWatch Logs Insights,Analytics,Queries run > 0,No queries for 30+ days,N/A - Pay per query,N/A - Query history,CloudWatch,Log analytics service
+CloudWatch Evidently,Experimentation,ExperimentEvaluations > 0,No evaluations for 30+ days,N/A - Feature flags and A/B testing,N/A - Projects can be deleted,CloudWatch Metrics,Feature experimentation
+CloudWatch RUM,Monitoring,EventsReceived > 0 (real user monitoring),No events for 30+ days,N/A - Pay per event,N/A - App monitors persist,CloudWatch Metrics,Real user monitoring
+CloudWatch Synthetics,Monitoring,CanaryRuns > 0,No canary runs for 30+ days,N/A - Pay per run,N/A - Canaries can be deleted,CloudWatch Metrics,Synthetic monitoring
+GuardDuty,Security,Findings generated OR detector enabled,Detector suspended or no findings for 90+ days,N/A - Security service,N/A - Findings can be archived,CloudWatch + GuardDuty API,Threat detection
+Macie,Security,Jobs run > 0 (data classification),No jobs for 30+ days,N/A - Sensitive data discovery,N/A - Findings archived,CloudWatch Metrics,S3 data classification
+Security Hub,Security,Findings ingested,Security Hub disabled for 30+ days,N/A - Security posture management,N/A - Findings archived,CloudWatch + Security Hub API,Aggregates security findings
+Inspector,Security,Assessments run > 0,No assessments for 30+ days,N/A - Vulnerability scanning,N/A - Findings archived,CloudWatch + Inspector API,EC2/ECR/Lambda scanning
+Detective,Security,Data ingested from VPC Flow Logs CloudTrail,Detective disabled for 30+ days,N/A - Security investigation,N/A - Historical data,CloudWatch Metrics,Security graph analysis
+WAF,Security,Requests evaluated > 0,Web ACL with no traffic for 30+ days,Low request volume for costs,N/A - Web ACLs can be deleted,CloudWatch Metrics,Per-rule and per-request costs
+Shield,Security,Shield Advanced subscription active,N/A - DDoS protection,N/A - Shield Standard is free,N/A - Shield Advanced is flat fee,CloudWatch Metrics,DDoS protection service
+Firewall Manager,Security,Policies applied across accounts,No policies active for 30+ days,N/A - Security policy management,N/A - Policies persist,CloudWatch + Firewall Mgr API,Centralized firewall management
+Network Firewall,Security,Packets processed > 0,Firewall with no traffic for 7+ days,Low packet rate for hourly cost,N/A - Firewalls can be deleted,CloudWatch Metrics,Stateful firewall
+Certificate Manager,Security,Certificates issued and in use,Certificates not associated with resources,N/A - Free for ACM-issued certs,N/A - Certificates expire,ACM API,Free SSL/TLS certificates
+Secrets Manager,Security,SecretValue retrieved > 0,No retrievals for 90+ days,Secrets without rotation,N/A - Delete unused secrets,CloudWatch Metrics,Secret storage and API calls
+Parameter Store,Management,Parameters accessed > 0,No access for 90+ days,N/A - Standard params are free,N/A - Parameters can be deleted,CloudWatch Metrics,Advanced parameters cost
+Organizations,Management,Accounts in organization,N/A - Account management,N/A - Free service,N/A - Organization structure,Organizations API,Multi-account management
+Control Tower,Management,Guardrails enabled,N/A - Landing zone management,N/A - Uses underlying services,N/A - Governance framework,CloudWatch + Control Tower API,AWS account governance
+Service Catalog,Management,Products provisioned > 0,No provisioning for 90+ days,N/A - Infrastructure catalog,N/A - Portfolios persist,CloudWatch Metrics,Self-service infrastructure
+License Manager,Management,Licenses tracked,No license usage tracked for 90+ days,N/A - License tracking,N/A - Free service,License Manager API,Software license management
+Resource Groups,Management,Groups with tagged resources,Groups with no resources for 30+ days,N/A - Free service,N/A - Groups can be deleted,Resource Groups API,Organize AWS resources
+Tag Editor,Management,Tags applied to resources,N/A - Tagging service,N/A - Free service,N/A - Tags are metadata,Resource Groups API,Bulk tagging operations
+Trusted Advisor,Management,Checks run (Business/Enterprise support),N/A - Best practice recommendations,N/A - Support tier dependent,N/A - Check history,Trusted Advisor API,Requires support plan
+Compute Optimizer,Management,Recommendations generated,No recommendations for 30+ days,N/A - Free service,N/A - Recommendation history,Compute Optimizer API,ML-powered recommendations
+Cost Explorer,Management,Cost data analyzed,N/A - Cost analysis tool,N/A - Free service,Historical cost data,Cost Explorer API,12-14 months of data
+Budgets,Management,Budgets configured with alerts,No budgets or alerts for 90+ days,N/A - Cost management,N/A - Budget definitions,Budgets API,First 2 budgets are free
+Cost and Usage Reports,Management,Reports generated to S3,No reports for 30+ days,N/A - Detailed billing,Reports in S3,CUR API,Detailed cost data
+Billing,Management,N/A - Billing service,N/A,N/A,Historical invoices,Billing API,Account billing information
+Marketplace,Marketplace,Subscriptions active with usage,Subscriptions with no usage for 30+ days,N/A - Third-party software,N/A - Subscription history,Marketplace API,Third-party software
+Support,Support,Cases opened,No cases for 180+ days,N/A - Support service,Case history,Support API,Support plan required
+Health Dashboard,Monitoring,Events tracked,N/A - Service health notifications,N/A - Free service,Event history,Health API,AWS service health
+Personal Health Dashboard,Monitoring,Events for account resources,N/A - Resource health notifications,N/A - Free service,Event history,Health API,Account-specific health
+IQ,Professional Services,Experts engaged,No engagements for 90+ days,N/A - Expert marketplace,N/A - Engagement history,IQ API,AWS expert marketplace
+re:Post,Community,Questions/answers posted,No activity for 90+ days,N/A - Free community,N/A - Post history,re:Post (web-only),AWS community forum
+Activate,Startup Program,Credits applied,N/A - Startup program,N/A - Free for eligible startups,N/A - Credit history,Activate (web-only),AWS credits for startups
+Well-Architected Tool,Management,Workload reviews completed,No reviews for 90+ days,N/A - Free service,Review history,Well-Architected API,Best practice framework
+Launch Wizard,Management,Deployments launched > 0,No deployments for 90+ days,N/A - Deployment automation,N/A - Free service,CloudWatch Metrics,Application deployment wizard
+App Studio,Development,Applications deployed > 0,No deployments for 30+ days,N/A - Low-code development,N/A - Apps can be deleted,CloudWatch Metrics,Low-code app builder
+App Runner,Compute,Service running with requests > 0,Service running with no requests for 7+ days,Low request volume for provisioned instances,N/A - Services can be paused,CloudWatch Metrics,Containerized web apps
+App Mesh,Networking,Mesh with active virtual nodes,Mesh with no traffic for 7+ days,N/A - Service mesh,N/A - Meshes can be deleted,CloudWatch + X-Ray,Application service mesh
+AppSync,API,GraphQL requests > 0,No requests for 30+ days,Low request volume,N/A - APIs can be deleted,CloudWatch Metrics,GraphQL API service
+AppFlow,Integration,Flow executions > 0,No executions for 30+ days,N/A - Pay per flow run,N/A - Flows can be disabled,CloudWatch Metrics,SaaS data integration
+AppConfig,Management,Configuration deployments > 0,No deployments for 30+ days,N/A - Feature flag service,N/A - Configurations persist,CloudWatch Metrics,Application configuration
+AppFabric,Security,Connections to SaaS apps configured,No data ingestion for 30+ days,N/A - SaaS security,N/A - Data archived,CloudWatch Metrics,SaaS app security
+Application Discovery Service,Migration,Agents running with data collection,No data collection for 30+ days,N/A - Discovery service,Discovered data for reference,CloudWatch Metrics,Migration planning
+Application Migration Service,Migration,Replication servers running,Servers with no replication for 7+ days,N/A - Migration service,N/A - Source servers archived,CloudWatch + MGN API,Lift-and-shift migrations
+Mainframe Modernization,Migration,Environments running with application usage,Environments with no usage for 7+ days,N/A - Mainframe refactoring,N/A - Application history,CloudWatch Metrics,Mainframe to AWS
+DataSync,Migration,Task executions with bytes transferred,No executions for 30+ days,N/A - Pay per transfer,N/A - Task configs persist,CloudWatch Metrics,Online data transfer
+Snow Family,Migration,Snowball jobs in progress,Jobs completed > 90 days ago,N/A - Physical data transfer,Job history for compliance,Snow API,Physical device transfer
+Database Migration Service,Migration,Replication instances running with tasks,Instances running with no tasks for 24+ hours,Low replication throughput,Migration history for reference,CloudWatch + DMS API,Database migration service
+DataZone,Governance,Data assets cataloged with active usage,No asset access for 30+ days,N/A - Data governance,Asset history,CloudWatch Metrics,Data catalog and governance
+Lake Formation,Governance,Data lake tables accessed > 0,No table access for 30+ days,N/A - Data lake management,Historical metadata,CloudWatch + Lake Formation API,Centralized data lake
+Glue DataBrew,Analytics,Recipes/jobs executed > 0,No job runs for 30+ days,N/A - Pay per session,Recipe versions,CloudWatch Metrics,Visual data preparation
+Managed Apache Airflow,Orchestration,Environment running with DAG executions,Environment running with no executions for 24+ hours,Low worker utilization,DAG run history,CloudWatch Metrics,Managed Airflow (MWAA)
+Managed Apache Flink,Analytics,Application running with records processed,Application running with no data for 24+ hours,Low parallelism utilization,Application snapshots,CloudWatch + Flink API,Stream processing (formerly Kinesis Data Analytics)
+Kinesis Video Streams,Media,Streams with active producers,Streams with no data for 7+ days,Low ingestion rate for stream count,Archived video in S3,CloudWatch Metrics,Video streaming service
+Interactive Video Service,Media,Channels streaming with viewers > 0,Channels with no streams for 7+ days,N/A - Pay per stream hour,Stream recordings in S3,CloudWatch Metrics,Live video streaming
+Elemental MediaConnect,Media,Flows active with data transfer,Flows with no data for 7+ days,Low bitrate for flow cost,N/A - Flows can be deleted,CloudWatch Metrics,Live video transport
+Elemental MediaConvert,Media,Jobs completed > 0,No jobs for 30+ days,N/A - Pay per minute of output,N/A - Job history,CloudWatch Metrics,Video transcoding
+Elemental MediaLive,Media,Channels running with input,Channels running idle for 7+ days,Low encoding utilization,N/A - Stop channels,CloudWatch Metrics,Live video encoding
+Elemental MediaPackage,Media,Endpoints serving content with requests > 0,Endpoints with no requests for 7+ days,Low request volume,N/A - Delete endpoints,CloudWatch Metrics,Video origination and packaging
+Elemental MediaStore,Media,Objects with GET requests > 0,No requests for 30+ days,Low request volume,N/A - Delete containers,CloudWatch Metrics,Media-optimized storage
+Elemental MediaTailor,Media,Configurations with ad insertions > 0,Configurations with no usage for 30+ days,N/A - Pay per session,N/A - Configurations persist,CloudWatch Metrics,Video ad insertion
+Elemental Appliances & Software,Media,Appliances/licenses active,Appliances not in use for 30+ days,N/A - On-premises solutions,N/A - License management,On-premises monitoring,On-premises video solutions
+Deadline Cloud,Rendering,Farms with active jobs,Farms with no jobs for 7+ days,Low worker utilization,Job history,CloudWatch Metrics,Render farm management
+GameLift,Gaming,Fleets with active instances and sessions,Fleets with no sessions for 7+ days,Fleet capacity > session demand,N/A - Delete fleets,CloudWatch + GameLift API,Game server hosting
+Managed Blockchain,Blockchain,Network active with transactions,Network with no transactions for 30+ days,Low transaction volume,N/A - Delete networks,CloudWatch Metrics,Hyperledger Fabric/Ethereum
+Ground Station,Satellite,Antenna reservations with contacts,No contacts for 90+ days,N/A - Pay per minute of contact,Contact history,CloudWatch Metrics,Satellite ground station
+IoT Core,IoT,Messages published/received > 0,No MQTT/HTTP messages for 30+ days,Low message volume,N/A - Device registry,CloudWatch Metrics,IoT messaging
+IoT Analytics,IoT,Data store ingestion > 0,No data ingestion for 30+ days,Low query volume on datasets,Archived datasets in S3,CloudWatch Metrics,IoT data analytics
+IoT Device Management,IoT,Devices registered and communicating,Devices registered but offline for 30+ days,N/A - Device fleet management,Device history,CloudWatch + IoT API,Fleet management
+IoT Device Defender,IoT,Audit checks run with devices monitored,No audits for 30+ days,N/A - Security auditing,Audit history,CloudWatch Metrics,IoT security
+IoT Events,IoT,Detector models with inputs > 0,No inputs for 30+ days,N/A - Event detection,N/A - Detector models persist,CloudWatch Metrics,IoT event detection
+IoT FleetWise,IoT,Vehicles with data collection,Vehicles with no data for 30+ days,N/A - Vehicle data collection,Collected data in S3,CloudWatch Metrics,Vehicle data collection
+IoT Greengrass,IoT,Core devices connected with deployments,Devices offline for 30+ days,N/A - Edge computing,Deployment history,CloudWatch + Greengrass API,Edge runtime for IoT
+IoT SiteWise,IoT,Asset models with measurements > 0,No measurements for 30+ days,Low ingestion rate,Historical data in S3,CloudWatch Metrics,Industrial data collection
+IoT TwinMaker,IoT,Workspaces with entities and scenes,No scene access for 30+ days,N/A - Digital twin creation,Entity history,CloudWatch Metrics,Digital twin service
+Lookout for Equipment,ML,Models trained with inference > 0,No inference for 30+ days,N/A - Anomaly detection,Model versions,CloudWatch Metrics,Equipment anomaly detection
+Monitron,IoT,Sensors active with data collection,Sensors with no data for 30+ days,N/A - Equipment monitoring,Sensor data history,CloudWatch Metrics,End-to-end equipment monitoring
+Panorama,ML,Appliances deployed with video analysis,Appliances with no analysis for 7+ days,N/A - Computer vision appliance,Analysis results,CloudWatch Metrics,Edge computer vision
+Kendra,AI Search,Indexes with queries > 0,No queries for 30+ days,Low query volume for index cost,N/A - Delete unused indexes,CloudWatch + Kendra API,Intelligent search service
+Lex,AI,Bot conversations > 0,No conversations for 30+ days,Low conversation volume,Conversation logs in S3,CloudWatch Metrics,Conversational AI
+Polly,AI,Characters converted to speech > 0,No conversions for 30+ days,N/A - Pay per character,N/A - No persistence,CloudWatch Metrics,Text-to-speech
+Transcribe,AI,Audio minutes transcribed > 0,No transcriptions for 30+ days,N/A - Pay per minute,Transcription jobs in S3,CloudWatch Metrics,Speech-to-text
+Translate,AI,Characters translated > 0,No translations for 30+ days,N/A - Pay per character,N/A - No persistence,CloudWatch Metrics,Language translation
+Comprehend,AI,Text analyzed > 0,No analysis for 30+ days,N/A - Pay per request,N/A - Analysis results,CloudWatch Metrics,Natural language processing
+Comprehend Medical,AI,Medical text analyzed > 0,No analysis for 30+ days,N/A - Pay per request,N/A - Analysis results,CloudWatch Metrics,Medical text analysis
+Rekognition,AI,Images/videos analyzed > 0,No analysis for 30+ days,N/A - Pay per image/minute,N/A - Analysis results,CloudWatch Metrics,Image and video analysis
+Textract,AI,Documents analyzed > 0,No analysis for 30+ days,N/A - Pay per page,N/A - Extraction results,CloudWatch Metrics,Document text extraction
+Forecast,ML,Datasets with forecasts generated > 0,No forecasts for 30+ days,N/A - Pay per forecast,Historical forecasts,CloudWatch Metrics,Time series forecasting
+Personalize,ML,Solutions deployed with recommendations > 0,No recommendations for 30+ days,Low recommendation volume,Historical training data,CloudWatch + Personalize API,ML recommendations
+Fraud Detector,ML,Detector versions with evaluations > 0,No evaluations for 30+ days,N/A - Pay per prediction,Model versions,CloudWatch Metrics,Online fraud detection
+Augmented AI,ML,Human review loops with tasks > 0,No tasks for 30+ days,N/A - Human review service,Review results,CloudWatch Metrics,Human review workflows
+Bedrock,AI,Model invocations > 0,No invocations for 30+ days,N/A - Pay per token,N/A - Generative AI,CloudWatch Metrics,Foundation models
+Bedrock AgentCore,AI,Agents with invocations > 0,No agent invocations for 30+ days,N/A - Agent orchestration,Agent execution history,CloudWatch Metrics,AI agent framework
+Q Business,AI,Applications with queries > 0,No queries for 30+ days,Low query volume for subscription,Conversation history,CloudWatch Metrics,Business chat assistant
+Q Developer,AI,IDE usage with code suggestions > 0,No usage for 30+ days,N/A - Developer assistant,N/A - Usage-based or subscription,CloudWatch Metrics,AI coding assistant
+Nova Act,AI,N/A - New service details pending,N/A,N/A,N/A,TBD,Amazon Nova service
+Amazon Q,AI,Conversations > 0,No conversations for 30+ days,N/A - AI assistant,Conversation logs,CloudWatch Metrics,AWS assistant
+Grafana,Monitoring,Workspaces with active dashboards,Workspaces with no access for 30+ days,N/A - Pay per active user,Dashboard versions,CloudWatch + Grafana API,Managed Grafana
+Prometheus,Monitoring,Workspaces with active metrics collection,Workspaces with no ingestion for 30+ days,Low metric ingestion rate,N/A - Metric retention,CloudWatch + AMP API,Managed Prometheus
+DevOps Guru,ML,Insights generated,No insights for 30+ days,N/A - ML-powered operations,Insight history,CloudWatch + DevOps Guru API,Operational anomaly detection
+DevOps Agent,Development,N/A - New service details pending,N/A,N/A,N/A,TBD,DevOps automation
+Resilience Hub,Management,Applications assessed for resiliency,No assessments for 90+ days,N/A - Resilience assessment,Assessment history,CloudWatch Metrics,Application resilience
+Fault Injection Simulator,Testing,Experiments run > 0,No experiments for 90+ days,N/A - Chaos engineering,Experiment results,CloudWatch Metrics,Chaos engineering service
+Incident Manager,Operations,Incidents tracked,No incidents for 90 days (good sign),N/A - Incident response,Incident history,CloudWatch + Incident Manager API,Incident management
+Service Quotas,Management,Quota increase requests,N/A - Quota management,N/A - Free service,Request history,Service Quotas API,AWS service limits
+Resource Access Manager,Management,Resource shares active,Shares with no resources for 90+ days,N/A - Free service,Share history,RAM API,Cross-account resource sharing
+Resource Explorer,Management,Indexed resources searchable,N/A - Resource search,N/A - Free service,Resource index,Resource Explorer API,Multi-region resource search
+Infrastructure Composer,Development,Applications composed > 0,No compositions for 90+ days,N/A - Free visual design,Application templates,CloudWatch Metrics,Visual IaC designer
+Serverless Application Repository,Development,Applications published/deployed > 0,No deployments for 90+ days,N/A - Application marketplace,Application versions,CloudWatch Metrics,Serverless app marketplace
+Proton,Development,Services/environments deployed > 0,No deployments for 30+ days,N/A - Platform engineering,Service templates,CloudWatch + Proton API,Infrastructure delivery service
+FinSpace,Financial Services,Environments with active datasets,No data access for 30+ days,N/A - Financial data management,Dataset versions,CloudWatch Metrics,Financial services data
+HealthLake,Healthcare,Data stores with FHIR data,No queries for 30+ days,Low query volume,N/A - FHIR data storage,CloudWatch Metrics,Healthcare data storage
+HealthOmics,Healthcare,Workflows run > 0,No workflow runs for 30+ days,N/A - Genomics workflows,Workflow results,CloudWatch Metrics,Genomics and omics
+HealthImaging,Healthcare,Image sets with retrieval > 0,No retrievals for 30+ days,N/A - Medical imaging storage,Image data in S3,CloudWatch Metrics,Medical imaging service
+Clean Rooms,Analytics,Collaborations with queries > 0,No queries for 30+ days,N/A - Privacy-preserving analytics,Query results,CloudWatch Metrics,Secure data collaboration
+Entity Resolution,Analytics,Matching workflows run > 0,No workflow runs for 30+ days,N/A - Record matching,Match results,CloudWatch Metrics,Entity matching service
+Data Exchange,Data Marketplace,Subscriptions with data sets accessed,No data access for 30+ days,N/A - Data marketplace,Subscription history,CloudWatch Metrics,Third-party data marketplace
+Data Firehose,Streaming,Records delivered > 0,No records for 7+ days,Low throughput for buffer settings,N/A - Delivery streams can be deleted,CloudWatch Metrics,Stream to S3/Redshift/etc
+Data Transfer Terminal,Migration,N/A - New service details pending,N/A,N/A,N/A,TBD,Data transfer service
+Supply Chain,Supply Chain,N/A - New service details pending,N/A,N/A,N/A,TBD,Supply chain management
+Partner Central,Marketplace,Partner-specific usage,N/A,N/A,N/A,Partner portal,AWS Partner Network
+Payment Cryptography,Security,Keys used for payment processing,No usage for 30+ days,N/A - Payment HSM service,N/A - Keys can be deleted,CloudWatch Metrics,Payment key management
+Verified Permissions,Security,Authorization requests > 0,No requests for 30+ days,N/A - Fine-grained authorization,Policy versions,CloudWatch Metrics,Authorization service
+User Notifications,Management,Notification channels configured,No notifications for 90+ days,N/A - Free service,Notification history,CloudWatch Metrics,Unified notifications
+End User Messaging,Messaging,Messages sent > 0,No messages for 30+ days,N/A - SMS/push notifications,N/A - Pay per message,CloudWatch Metrics,Customer messaging
+Pinpoint,Marketing,Campaigns sent with engagement > 0,No campaigns for 30+ days,Low engagement rate,Campaign analytics,CloudWatch + Pinpoint API,Customer engagement
+Simple Email Service,Email,Emails sent > 0,No emails for 30+ days,N/A - Pay per email,Email logs in CloudWatch,CloudWatch Metrics,Transactional email
+Chime,Communications,Meetings hosted > 0,No meetings for 30+ days,N/A - Pay per use,Meeting history,CloudWatch Metrics,Business communications
+Chime SDK,Communications,Applications with sessions > 0,No sessions for 30+ days,N/A - Messaging/audio/video SDK,N/A - SDK usage,CloudWatch Metrics,Communication SDK
+Connect,Contact Center,Instances with active contacts,Instances with no contacts for 7+ days,Low utilization of agent capacity,Call recordings in S3,CloudWatch + Connect API,Cloud contact center
+WorkDocs,Collaboration,Documents with activity > 0,No document access for 90+ days,Active users << licensed users,Document versions,CloudWatch Metrics,Document collaboration
+WorkMail,Email,Mailboxes with email activity,Mailboxes with no activity for 90+ days,N/A - Email service,Archived emails,CloudWatch Metrics,Business email
+WorkSpaces Applications,End User Computing,Applications streamed > 0,No streaming sessions for 30+ days,N/A - Application streaming,Usage logs,CloudWatch Metrics,Application streaming
+WorkSpaces Secure Browser,End User Computing,Browser sessions > 0,No sessions for 30+ days,N/A - Secure browsing,Session logs,CloudWatch Metrics,Managed secure browser
+WorkSpaces Thin Client,End User Computing,Devices registered and connected,Devices not connected for 30+ days,N/A - Device management,Device history,CloudWatch Metrics,Thin client device
+Red Hat OpenShift Service on AWS,Container,Clusters with nodes and pods,Clusters with no pods for 7+ days,Node utilization < 30%,N/A - Delete clusters,CloudWatch + OpenShift,Managed OpenShift
+Elastic VMware Service,Compute,Hosts provisioned with VMs running,Hosts with no VMs for 7+ days,Low VM density on hosts,N/A - Cluster snapshots,CloudWatch + VMware tools,VMware on AWS
+Oracle Database@AWS,Database,Databases with connections > 0,No connections for 7+ days,Low connection count and IOPS,Backups for recovery,CloudWatch + Oracle metrics,Managed Oracle database
+Outposts,Hybrid,Outpost with active instances/resources,Outpost with no resources for 7+ days,Low resource utilization on Outpost,N/A - Outpost hardware,CloudWatch + Outposts API,On-premises AWS infrastructure
+One Enterprise,Identity,N/A - New service details pending,N/A,N/A,N/A,TBD,Enterprise identity service
+Wickr,Security,Wickr network active with messages,No activity for 30+ days,N/A - Encrypted messaging,Message history (encrypted),CloudWatch Metrics,End-to-end encrypted communication
+SimSpace Weaver,Simulation,Simulations running,No simulations for 30+ days,N/A - Large-scale simulation,Simulation results,CloudWatch Metrics,Spatial simulation service
+Parallel Computing Service,HPC,Jobs submitted and running,No jobs for 30+ days,N/A - HPC workloads,Job history,CloudWatch Metrics,HPC job scheduling
+Telco Network Builder,Telecom,Networks deployed,No deployments for 90+ days,N/A - Telecom infrastructure,Network configurations,CloudWatch Metrics,Telecom network automation
+Braket,Quantum,Quantum tasks submitted > 0,No tasks for 90+ days,N/A - Pay per task,Task results,CloudWatch Metrics,Quantum computing service
+Signer,Security,Signing jobs executed > 0,No signing jobs for 90+ days,N/A - Code signing,Signing profiles,CloudWatch Metrics,Code signing service
+Artifact,Compliance,Compliance reports downloaded,No downloads for 180+ days,N/A - Free compliance docs,Download history,Artifact API,Compliance documentation
+Audit Manager,Compliance,Assessments active with evidence collection,No assessments for 90+ days,N/A - Compliance automation,Assessment history,CloudWatch + Audit Manager API,Continuous auditing
+Billing Conductor,FinOps,Billing groups configured with accounts,No billing groups for 90+ days,N/A - Showback/chargeback,Billing history,Billing Conductor API,Custom billing
+B2B Data Interchange,Integration,Trading partners with transactions > 0,No transactions for 30+ days,N/A - EDI transformation,Transaction history,CloudWatch Metrics,EDI data exchange
+Auto Scaling,Management,Auto Scaling groups with instances,Groups with no scaling activity for 90+ days,N/A - Free service,Scaling history,CloudWatch + Auto Scaling API,Automatic scaling
+Batch,Compute,Job queues with jobs submitted > 0,No jobs for 30+ days,Low compute environment utilization,Job logs in CloudWatch,CloudWatch + Batch API,Batch job processing
+SWF,Orchestration,Workflows with executions > 0,No executions for 90+ days,N/A - Workflow orchestration (legacy),Execution history,CloudWatch Metrics,Simple Workflow (legacy - use Step Functions)
+CloudShell,Development,Sessions started > 0,No sessions for 90+ days,N/A - Free browser-based shell,Session history,CloudWatch Metrics,Browser-based CLI
+CloudSearch,Search,Search instances running with queries > 0,Instances with no queries for 30+ days,Low query volume for instance size,N/A - Delete domains,CloudWatch Metrics,Managed search (consider OpenSearch)
+CloudHSM,Security,HSM clusters with client connections,Clusters with no connections for 30+ days,N/A - Hardware security module,N/A - Keys in HSM,CloudWatch Metrics,Hardware security module
+Cloud Map,Networking,Namespaces with service discovery,Namespaces with no lookups for 90+ days,N/A - Service discovery,Service registry,CloudWatch Metrics,Service discovery
+Directory Service,Identity,Directories with domain controllers,Directories with no authentications for 7+ days,N/A - Managed Active Directory,Directory snapshots,CloudWatch Metrics,Managed Microsoft AD
+Elastic Transcoder,Media,Jobs completed > 0,No jobs for 90+ days,N/A - Pay per minute (legacy),Job history,CloudWatch Metrics,Video transcoding (legacy - use MediaConvert)
+Elastic Disaster Recovery,DR,Replication servers for source servers,Servers with no replication for 7+ days,N/A - Disaster recovery,Recovery points,CloudWatch + DRS API,Application-level DR
+Identity Center,Identity,Users/groups with SSO activity,Users with no SSO for 90+ days,N/A - Free SSO service,Login history,CloudWatch + Identity Center API,AWS SSO
+Global Accelerator,Networking,Accelerators with endpoints and traffic > 0,Accelerators with no traffic for 7+ days,Low traffic volume for hourly cost,N/A - Delete accelerators,CloudWatch Metrics,Global traffic routing
+Global View,Management,N/A - Management service,N/A,N/A - Free service,N/A,Global View (console),Multi-region resource view
+Recycle Bin,Storage,Retention rules with recovered resources,Rules with no resources for 180+ days,N/A - Free service,Deleted resource history,Recycle Bin API,Resource recovery
+RTB Fabric,Networking,N/A - New service details pending,N/A,N/A,N/A,TBD,Real-time bidding fabric
+Deadline Cloud,Rendering,Render farms with active jobs,Farms idle for 7+ days,Low worker utilization,Render outputs,CloudWatch Metrics,Cloud rendering service
+CodeCatalyst,Development,Projects with workflows running,Projects with no activity for 30+ days,N/A - Dev environment service,Project history,CloudWatch Metrics,Unified dev environment
+Console Home,Management,N/A - Console navigation,N/A,N/A,N/A,N/A,AWS Console homepage
+Security Agent,Security,N/A - New service details pending,N/A,N/A,N/A,TBD,Security agent
+Security Hub CSPM,Security,Cloud security posture assessments,N/A,N/A - Security posture,Assessment history,CloudWatch Metrics,Cloud security posture management
+Security Incident Response,Security,N/A - New service details pending,N/A,N/A,N/A,TBD,Incident response service
+Security Lake,Security,Data lake with security data ingestion,No ingestion for 30+ days,N/A - Security data lake,Security logs in S3,CloudWatch Metrics,Security data lake
+Private Certificate Authority,Security,Private CAs issuing certificates,CAs with no certificates issued for 90+ days,N/A - Private CA service,Certificate history,CloudWatch Metrics,Private certificate authority
+S3 Glacier,Storage,Vaults with archives,N/A - Long-term archive storage,N/A - Archive storage tier,All data is archived by definition,S3 API,Archival storage (part of S3)
+MQ,Messaging,Brokers running with connections > 0,Brokers with no connections for 7+ days,Low message throughput,N/A - Delete brokers,CloudWatch Metrics,Managed message brokers
+Aurora DSQL,Database,N/A - New database service,N/A,N/A,N/A,TBD,Aurora distributed SQL
